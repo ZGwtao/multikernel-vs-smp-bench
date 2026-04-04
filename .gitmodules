@@ -1,0 +1,24 @@
+[submodule "seL4-multikernel"]
+	path = seL4-multikernel
+	url = https://github.com/au-ts/seL4.git
+	branch = multikernel
+[submodule "seL4-mainline"]
+	path = seL4-mainline
+	url = https://github.com/seL4/seL4.git
+	branch = master
+[submodule "microkit-multikernel"]
+	path = microkit-multikernel
+	url = https://github.com/ZGwtao/microkit.git
+	branch = multikernel-benchmark
+[submodule "microkit-capdl-multikernel"]
+	path = microkit-capdl-multikernel
+	url = https://github.com/ZGwtao/microkit.git
+	branch = capdl_multikernel
+[submodule "microkit-smp"]
+	path = microkit-smp
+	url = https://github.com/au-ts/microkit.git
+	branch = julia/smp
+[submodule "microkit-unicore"]
+	path = microkit-unicore
+	url = https://github.com/ZGwtao/microkit.git
+	branch = main
