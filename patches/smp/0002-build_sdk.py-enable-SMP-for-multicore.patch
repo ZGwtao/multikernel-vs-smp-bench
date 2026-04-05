@@ -1,0 +1,64 @@
+From e515815fd286c364be5f334effd1e00c2c89b5b0 Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Sun, 5 Apr 2026 14:14:29 +1000
+Subject: [PATCH 2/2] build_sdk.py: enable SMP for multicore
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ build_sdk.py | 25 +++++++++++++++++++++----
+ 1 file changed, 21 insertions(+), 4 deletions(-)
+
+diff --git a/build_sdk.py b/build_sdk.py
+index b122824..89bf48c 100644
+--- a/build_sdk.py
++++ b/build_sdk.py
+@@ -408,8 +408,16 @@ SUPPORTED_CONFIGS = (
+     ConfigInfo(
+         name="release",
+         debug=False,
+-        kernel_options={},
+-        kernel_options_arch={},
++        kernel_options={
++            "HardwareDebugAPI": False,
++            "KernelMaxNumNodes": 2,
++            "KernelEnableSMPSupport": True,
++        },
++        kernel_options_arch={
++            KernelArch.AARCH64: {
++                "KernelArmExportPMUUser": True,
++            },
++        },
+     ),
+     ConfigInfo(
+         name="debug",
+@@ -417,9 +425,15 @@ SUPPORTED_CONFIGS = (
+         kernel_options={
+             "KernelDebugBuild": True,
+             "KernelPrinting": True,
+-            "KernelVerificationBuild": False
++            "KernelVerificationBuild": False,
++            "KernelMaxNumNodes": 2,
++            "KernelEnableSMPSupport": True,
++        },
++        kernel_options_arch={
++            KernelArch.AARCH64: {
++                "KernelArmExportPMUUser": True,
++            },
+         },
+-        kernel_options_arch={},
+     ),
+     ConfigInfo(
+         name="benchmark",
+@@ -429,6 +443,9 @@ SUPPORTED_CONFIGS = (
+             "KernelVerificationBuild": False,
+             "KernelBenchmarks": "track_utilisation",
+             "KernelSignalFastpath": True,
++            "HardwareDebugAPI": False,
++            "KernelMaxNumNodes": 2,
++            "KernelEnableSMPSupport": True,
+         },
+         kernel_options_arch={
+             KernelArch.AARCH64: {
+-- 
+2.43.0
+

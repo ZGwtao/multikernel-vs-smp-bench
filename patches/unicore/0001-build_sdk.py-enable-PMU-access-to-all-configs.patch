@@ -1,0 +1,55 @@
+From 534c6c716b2be1e437e58fe491892bb941a30d0c Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Sun, 5 Apr 2026 14:26:31 +1000
+Subject: [PATCH] build_sdk.py: enable PMU access to all configs
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ build_sdk.py | 17 ++++++++++++++---
+ 1 file changed, 14 insertions(+), 3 deletions(-)
+
+diff --git a/build_sdk.py b/build_sdk.py
+index 5ff324b..ec367fb 100644
+--- a/build_sdk.py
++++ b/build_sdk.py
+@@ -434,8 +434,14 @@ SUPPORTED_CONFIGS = (
+     ConfigInfo(
+         name="release",
+         debug=False,
+-        kernel_options={},
+-        kernel_options_arch={},
++        kernel_options={
++            "HardwareDebugAPI": False
++        },
++        kernel_options_arch={
++            KernelArch.AARCH64: {
++                "KernelArmExportPMUUser": True,
++            },
++        },
+     ),
+     ConfigInfo(
+         name="debug",
+@@ -445,7 +451,11 @@ SUPPORTED_CONFIGS = (
+             "KernelPrinting": True,
+             "KernelVerificationBuild": False
+         },
+-        kernel_options_arch={},
++        kernel_options_arch={
++            KernelArch.AARCH64: {
++                "KernelArmExportPMUUser": True,
++            },
++        },
+     ),
+     ConfigInfo(
+         name="benchmark",
+@@ -455,6 +465,7 @@ SUPPORTED_CONFIGS = (
+             "KernelVerificationBuild": False,
+             "KernelBenchmarks": "track_utilisation",
+             "KernelSignalFastpath": True,
++            "HardwareDebugAPI": False
+         },
+         kernel_options_arch={
+             KernelArch.AARCH64: {
+-- 
+2.43.0
+
