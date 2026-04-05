@@ -19,7 +19,8 @@ MICROKIT_UNICORE     	:= $(CURDIR)/microkit-unicore
 .PHONY: all multikernel smp unicore \
         setup setup-python setup-rust setup-submodules \
         run run-multikernel run-smp run-unicore \
-        clean reset
+        clean reset \
+		link link-multikernel link-smp link-unicore
 
 all: multikernel smp unicore
 
@@ -55,12 +56,55 @@ setup-rust:
 	rustup target add aarch64-unknown-none
 	rustup component add rust-src --toolchain 1.94.0-x86_64-unknown-linux-gnu
 
+# Example to symlink into each microkit's example/ directory
+EXAMPLE ?= ppc-no-interference
+
+# ============================================================
+# Symlink helper (used by link-* targets)
+# Usage: $(call create-symlink, <microkit-dir>)
+# ============================================================
+define create-symlink
+	@echo ">>> Creating symlink: $(1)/example/$(EXAMPLE) -> $(CURDIR)/$(EXAMPLE)..."
+	@if [ ! -d "$(CURDIR)/$(EXAMPLE)" ] && [ ! -f "$(CURDIR)/$(EXAMPLE)" ]; then \
+		echo "ERROR: Source '$(CURDIR)/$(EXAMPLE)' does not exist, aborting."; \
+		exit 1; \
+	elif [ -L "$(1)/example/$(EXAMPLE)" ]; then \
+		echo "INFO: Symlink already exists in $(1)/example/, skipping."; \
+	elif [ -e "$(1)/example/$(EXAMPLE)" ]; then \
+		echo "ERROR: '$(1)/example/$(EXAMPLE)' exists but is not a symlink, please remove it manually."; \
+		exit 1; \
+	else \
+		ln -s $(CURDIR)/$(EXAMPLE) $(1)/example/$(EXAMPLE); \
+		echo "INFO: Symlink created in $(1)/example/."; \
+	fi
+endef
+
+# ============================================================
+# Symlink targets
+# ============================================================
+.PHONY: link link-multikernel link-smp link-unicore
+
+link: link-multikernel link-smp link-unicore
+
+link-multikernel:
+	$(call create-symlink,$(MICROKIT_MULTIKERNEL))
+
+link-smp:
+	$(call create-symlink,$(MICROKIT_SMP))
+
+link-unicore:
+	$(call create-symlink,$(MICROKIT_UNICORE))
+
+# ============================================================
+# Submodule setup (calls link after patching)
+# ============================================================
 setup-submodules:
 	@echo ">>> Initializing Git submodules and applying patches..."
 	git submodule update --init --recursive
 	cd $(MICROKIT_MULTIKERNEL) 	&& git am $(PATCHES)/multikernel/*
 	cd $(MICROKIT_SMP)        	&& git am $(PATCHES)/smp/*
 	cd $(MICROKIT_UNICORE)    	&& git am $(PATCHES)/unicore/*
+	$(MAKE) link
 
 # ============================================================
 # Build targets
@@ -75,7 +119,7 @@ multikernel: setup-submodules
 			--skip-docs --skip-tar && \
 		$(PYTHON) dev_build.py \
 			--rebuild \
-			--example benchmarks \
+			--example $(EXAMPLE) \
 			--board $(MICROKIT_BOARD)_multikernel
 
 smp: setup-submodules
@@ -88,7 +132,7 @@ smp: setup-submodules
 			--skip-docs --skip-tar && \
 		$(PYTHON) dev_build.py \
 			--rebuild \
-			--example benchmarks \
+			--example $(EXAMPLE) \
 			--board $(MICROKIT_BOARD)
 
 unicore: setup-submodules
@@ -101,7 +145,7 @@ unicore: setup-submodules
 			--skip-docs --skip-tar && \
 		$(PYTHON) dev_build.py \
 			--rebuild \
-			--example benchmarks \
+			--example $(EXAMPLE) \
 			--board $(MICROKIT_BOARD)
 
 # ============================================================
@@ -144,3 +188,12 @@ clean:
 reset: clean
 	git submodule foreach --recursive 'git am --abort || true'
 	git submodule update --init --recursive --force
+	@echo ">>> Removing symlinks from submodule example directories..."
+	@for dir in $(MICROKIT_MULTIKERNEL) $(MICROKIT_SMP) $(MICROKIT_UNICORE); do \
+		if [ -d "$$dir/example" ]; then \
+			find "$$dir/example" -maxdepth 1 -type l -exec rm -v {} \; ; \
+		else \
+			echo "INFO: $$dir/example does not exist, skipping."; \
+		fi \
+	done
+	@echo ">>> Reset complete."
