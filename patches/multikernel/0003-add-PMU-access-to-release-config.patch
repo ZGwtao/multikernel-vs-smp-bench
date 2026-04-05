@@ -1,0 +1,34 @@
+From 715715b4b703f86cc7193e318d935e775ac1cc61 Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Sun, 5 Apr 2026 16:41:11 +1000
+Subject: [PATCH 3/3] add PMU access to release config
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ build_sdk.py | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/build_sdk.py b/build_sdk.py
+index 8bac8b2..e312d17 100644
+--- a/build_sdk.py
++++ b/build_sdk.py
+@@ -352,8 +352,14 @@ SUPPORTED_CONFIGS = (
+     ConfigInfo(
+         name="release",
+         debug=False,
+-        kernel_options={},
+-        kernel_options_arch={},
++        kernel_options={
++            "HardwareDebugAPI": False
++        },
++        kernel_options_arch={
++            KernelArch.AARCH64: {
++                "KernelArmExportPMUUser": True,
++            },
++        },
+     ),
+     ConfigInfo(
+         name="debug",
+-- 
+2.43.0
+
