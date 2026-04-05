@@ -1,0 +1,76 @@
+From 5d36aaf1dc7ecd2816df3945e3bcc5e31d2ffb9a Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Sun, 5 Apr 2026 16:13:03 +1000
+Subject: [PATCH 2/2] enable TCB access and disable channel creation prio
+ restriction
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ tool/microkit/src/main.rs |  5 +++--
+ tool/microkit/src/sdf.rs  | 27 ++++++++++++++-------------
+ 2 files changed, 17 insertions(+), 15 deletions(-)
+
+diff --git a/tool/microkit/src/main.rs b/tool/microkit/src/main.rs
+index fa73107..017e7f9 100644
+--- a/tool/microkit/src/main.rs
++++ b/tool/microkit/src/main.rs
+@@ -2930,7 +2930,8 @@ fn build_system(
+ 
+     // In the benchmark configuration, we allow PDs to access their own TCB.
+     // This is necessary for accessing kernel's benchmark API.
+-    if config.benchmark {
++    // if config.benchmark {
++    // enable access to the TCB to disable FPU context
+         let mut tcb_cap_copy_invocation = Invocation::new(
+             config,
+             InvocationArgs::CnodeCopy {
+@@ -2956,7 +2957,7 @@ fn build_system(
+             },
+         );
+         system_invocations.push(tcb_cap_copy_invocation);
+-    }
++    // }
+ 
+     // Set VSpace and CSpace
+     let mut pd_set_space_invocation = Invocation::new(
+diff --git a/tool/microkit/src/sdf.rs b/tool/microkit/src/sdf.rs
+index c5bf777..63e66b3 100644
+--- a/tool/microkit/src/sdf.rs
++++ b/tool/microkit/src/sdf.rs
+@@ -1416,19 +1416,20 @@ pub fn parse(filename: &str, xml: &str, config: &Config) -> Result<SystemDescrip
+ 
+         let pd_a = &pds[&ch.end_a.pd];
+         let pd_b = &pds[&ch.end_b.pd];
+-        if ch.end_a.pp && pd_a.priority >= pd_b.priority {
+-            return Err(format!(
+-                "Error: PPCs must be to protection domains of strictly higher priorities; \
+-                        channel with PPC exists from pd {} (priority: {}) to pd {} (priority: {})",
+-                pd_a.name, pd_a.priority, pd_b.name, pd_b.priority
+-            ));
+-        } else if ch.end_b.pp && pd_b.priority >= pd_a.priority {
+-            return Err(format!(
+-                "Error: PPCs must be to protection domains of strictly higher priorities; \
+-                        channel with PPC exists from pd {} (priority: {}) to pd {} (priority: {})",
+-                pd_b.name, pd_b.priority, pd_a.name, pd_a.priority
+-            ));
+-        } else if ch.end_a.pp && pd_a.cpu != pd_b.cpu {
++        // if ch.end_a.pp && pd_a.priority >= pd_b.priority {
++        //     return Err(format!(
++        //         "Error: PPCs must be to protection domains of strictly higher priorities; \
++        //                 channel with PPC exists from pd {} (priority: {}) to pd {} (priority: {})",
++        //         pd_a.name, pd_a.priority, pd_b.name, pd_b.priority
++        //     ));
++        // } else if ch.end_b.pp && pd_b.priority >= pd_a.priority {
++        //     return Err(format!(
++        //         "Error: PPCs must be to protection domains of strictly higher priorities; \
++        //                 channel with PPC exists from pd {} (priority: {}) to pd {} (priority: {})",
++        //         pd_b.name, pd_b.priority, pd_a.name, pd_a.priority
++        //     ));
++        // } else 
++        if ch.end_a.pp && pd_a.cpu != pd_b.cpu {
+             return Err(format!(
+                 "Error: PPCs are not allowed across cores on multikernels; \
+                         channel with PPC exists from pd {} ({}) to pd {} ({})",
+-- 
+2.43.0
+
