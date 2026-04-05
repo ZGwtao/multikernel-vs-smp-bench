@@ -1,0 +1,33 @@
+From 8759dce93a1942ced8b61a5c66c8221dfb8ddcb4 Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Sun, 5 Apr 2026 16:51:04 +1000
+Subject: [PATCH 2/2] enable TCB access for all configurations
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ tool/microkit/src/capdl/builder.rs | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/tool/microkit/src/capdl/builder.rs b/tool/microkit/src/capdl/builder.rs
+index 44754e8..65c7493 100644
+--- a/tool/microkit/src/capdl/builder.rs
++++ b/tool/microkit/src/capdl/builder.rs
+@@ -594,12 +594,13 @@ pub fn build_capdl_spec(
+ 
+         // In the benchmark configuration, we allow PDs to access their own TCB.
+         // This is necessary for accessing kernel's benchmark API.
+-        if kernel_config.benchmark {
++        // if kernel_config.benchmark {
++        // enable TCB access for all configurations so that we can disable FPU switch
+             caps_to_insert_to_pd_cspace.push(capdl_util_make_cte(
+                 PD_TCB_CAP_IDX as u32,
+                 capdl_util_make_tcb_cap(pd_tcb_obj_id),
+             ));
+-        }
++        // }
+ 
+         // Allow PD to access their own VSpace for ops such as cache cleaning on ARM.
+         caps_to_insert_to_pd_cspace.push(capdl_util_make_cte(
+-- 
+2.43.0
+
