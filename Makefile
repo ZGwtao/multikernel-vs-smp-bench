@@ -1,7 +1,7 @@
 # ============================================================
 # Configuration variables (override via CLI, e.g. make MICROKIT_BOARD=rpi4)
 # ============================================================
-MICROKIT_CONFIG ?= debug
+MICROKIT_CONFIG ?= release
 MICROKIT_BOARD  ?= odroidc4
 MQ              ?= $(HOME)/wsp/machine_queue
 PATCHES         := $(CURDIR)/patches
@@ -120,7 +120,8 @@ multikernel: setup-submodules
 		$(PYTHON) dev_build.py \
 			--rebuild \
 			--example $(EXAMPLE) \
-			--board $(MICROKIT_BOARD)_multikernel
+			--board $(MICROKIT_BOARD)_multikernel \
+			--config $(MICROKIT_CONFIG)
 
 smp: setup-submodules
 	@echo ">>> Building smp (board=$(MICROKIT_BOARD), config=$(MICROKIT_CONFIG))..."
@@ -133,7 +134,8 @@ smp: setup-submodules
 		$(PYTHON) dev_build.py \
 			--rebuild \
 			--example $(EXAMPLE) \
-			--board $(MICROKIT_BOARD)
+			--board $(MICROKIT_BOARD) \
+			--config $(MICROKIT_CONFIG)
 
 unicore: setup-submodules
 	@echo ">>> Building unicore (board=$(MICROKIT_BOARD), config=$(MICROKIT_CONFIG))..."
@@ -146,7 +148,8 @@ unicore: setup-submodules
 		$(PYTHON) dev_build.py \
 			--rebuild \
 			--example $(EXAMPLE) \
-			--board $(MICROKIT_BOARD)
+			--board $(MICROKIT_BOARD) \
+			--config $(MICROKIT_CONFIG)
 
 # ============================================================
 # Run targets
