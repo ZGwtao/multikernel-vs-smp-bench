@@ -37,18 +37,17 @@ void init(void)
         asm volatile("" :: "r"(start), "r"(end));
     }
 
-    start = pmu_read_cycles();
     for (size_t i = 0; i < NUM_SAMPLES; i++) {
 
+        start = pmu_read_cycles();
         /* ==== Benchmark critical ==== */
         {
             /* Call high (does not switch threads) */
             seL4_Call(BASE_ENDPOINT_CAP + PPC_HI_LO_CHANNEL, microkit_msginfo_new(0, 0));
         }
-
+        end = pmu_read_cycles();
+        RECORDING_ADD_SAMPLE(start, end);
     }
-    end = pmu_read_cycles();
-    RECORDING_ADD_SAMPLE(start, end);
 
     RECORDING_END(results);
 
