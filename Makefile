@@ -19,7 +19,7 @@ MICROKIT_UNICORE     	:= $(CURDIR)/microkit-unicore
 .PHONY: all multikernel smp unicore \
         setup setup-python setup-rust setup-submodules \
         run run-multikernel run-smp run-unicore \
-        clean
+        clean reset
 
 all: multikernel smp unicore
 
@@ -140,3 +140,7 @@ clean:
 	rm -rf $(MICROKIT_MULTIKERNEL)/tmp_build
 	rm -rf $(MICROKIT_SMP)/tmp_build
 	rm -rf $(MICROKIT_UNICORE)/tmp_build
+
+reset: clean
+	git submodule foreach --recursive 'git am --abort || true'
+	git submodule update --init --recursive --force
