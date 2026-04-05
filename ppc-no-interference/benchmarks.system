@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+#include "config.h"
+
+#define str(v) _str(v)
+#define _str(v) #v
+
+<!--
+ Copyright 2025, UNSW
+
+ SPDX-License-Identifier: BSD-2-Clause
+-->
+<system>
+    <memory_region name="uart" size="0x1000" phys_addr="0xff803000" />
+
+    <!-- Benchmark: low to high, no interference, ppc. -->
+    <memory_region name="ppc_no_interference" size="0x1000" />
+
+    <protection_domain name="ppc_client" priority="103" cpu="0">
+        <program_image path="ppc_low_to_hi__low.elf" />
+
+        <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
+        <map mr="ppc_no_interference" vaddr="0x30001000" setvar_vaddr="results" />
+    </protection_domain>
+
+    <protection_domain name="ppc_server" priority="203" cpu="0" passive="true">
+        <program_image path="ppc_low_to_hi__high.elf" />
+
+        <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
+    </protection_domain>
+
+    <channel>
+        <end pd="ppc_server" id="2" />
+        <end pd="ppc_client" id="2" pp="true" />
+    </channel>
+
+    <!-- lowest priority. it should never interfere -->
+    <protection_domain name="manager" priority="0" cpu="0">
+        <program_image path="manager.elf" />
+        <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
+        <map mr="ppc_no_interference" vaddr="0x30002000" setvar_vaddr="results_base" />
+    </protection_domain>
+
+    <channel>
+        <end pd="manager" id=str(BENCHMARK_CH) />
+        <end pd="ppc_client" id="0" />
+    </channel>
+
+</system>
