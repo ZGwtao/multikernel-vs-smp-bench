@@ -21,7 +21,7 @@ typedef struct {
 } benchmark_t;
 
 static const benchmark_t benchmark_infos[] = {
-    { BENCHMARK_CH,   "ppc no interference" },
+    { BENCHMARK_CH,   "ppc interference" },
 };
 
 static const size_t benchmark_infos_count = sizeof(benchmark_infos)/sizeof(benchmark_infos[0]);
