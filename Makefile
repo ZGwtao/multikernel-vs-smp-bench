@@ -109,6 +109,9 @@ setup-submodules:
 # ============================================================
 # Build targets
 # ============================================================
+SYSTEM_FILE ?= benchmarks-four-cores.system
+export SYSTEM_FILE
+
 multikernel: setup-submodules
 	@echo ">>> Building multikernel (board=$(MICROKIT_BOARD)_multikernel, config=$(MICROKIT_CONFIG))..."
 	cd $(MICROKIT_MULTIKERNEL) && \
