@@ -1,0 +1,26 @@
+From e411b05e51b664cf13bec06dea8aa3d020a51d49 Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Mon, 6 Apr 2026 10:46:28 +1000
+Subject: [PATCH 4/4] update multikernel core num to 4
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ build_sdk.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/build_sdk.py b/build_sdk.py
+index e312d17..04e2aaa 100644
+--- a/build_sdk.py
++++ b/build_sdk.py
+@@ -211,7 +211,7 @@ SUPPORTED_BOARDS = (
+             "KernelEnableMultikernelSupport": True,
+             # TODO: Derive from device tree?
+             # "KernelMultikernelNumCPUs": 4,
+-            "KernelMultikernelNumCPUs": 2,
++            "KernelMultikernelNumCPUs": 4,
+         } | DEFAULT_KERNEL_OPTIONS_AARCH64,
+     ),
+     BoardInfo(
+-- 
+2.43.0
+

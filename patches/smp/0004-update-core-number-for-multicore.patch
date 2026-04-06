@@ -1,0 +1,44 @@
+From 2cd7b283834a8b708931e4763cc8e8e7658dc8f8 Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Mon, 6 Apr 2026 10:41:28 +1000
+Subject: [PATCH 4/4] update core number for multicore
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ build_sdk.py | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/build_sdk.py b/build_sdk.py
+index 89bf48c..9d6c600 100644
+--- a/build_sdk.py
++++ b/build_sdk.py
+@@ -410,7 +410,7 @@ SUPPORTED_CONFIGS = (
+         debug=False,
+         kernel_options={
+             "HardwareDebugAPI": False,
+-            "KernelMaxNumNodes": 2,
++            "KernelMaxNumNodes": 4,
+             "KernelEnableSMPSupport": True,
+         },
+         kernel_options_arch={
+@@ -426,7 +426,7 @@ SUPPORTED_CONFIGS = (
+             "KernelDebugBuild": True,
+             "KernelPrinting": True,
+             "KernelVerificationBuild": False,
+-            "KernelMaxNumNodes": 2,
++            "KernelMaxNumNodes": 4,
+             "KernelEnableSMPSupport": True,
+         },
+         kernel_options_arch={
+@@ -444,7 +444,7 @@ SUPPORTED_CONFIGS = (
+             "KernelBenchmarks": "track_utilisation",
+             "KernelSignalFastpath": True,
+             "HardwareDebugAPI": False,
+-            "KernelMaxNumNodes": 2,
++            "KernelMaxNumNodes": 4,
+             "KernelEnableSMPSupport": True,
+         },
+         kernel_options_arch={
+-- 
+2.43.0
+
