@@ -52,7 +52,7 @@ LIBS := -lmicrokit -Tmicrokit.ld
 
 IMAGE_FILE = $(BUILD_DIR)/loader.img
 REPORT_FILE = $(BUILD_DIR)/report.txt
-SYSTEM_FILE = benchmarks.system
+SYSTEM_FILE ?= benchmarks-two-cores.system
 SYSTEM_FILE_PP = $(BUILD_DIR)/$(SYSTEM_FILE).pp
 
 all: $(IMAGE_FILE)
