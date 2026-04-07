@@ -9,20 +9,21 @@ PATCHES         := $(CURDIR)/patches
 PYTHON := $(CURDIR)/pyenv/bin/python3
 PIP    := $(CURDIR)/pyenv/bin/pip
 
-MICROKIT_MULTIKERNEL 	:= $(CURDIR)/microkit-multikernel
-MICROKIT_SMP      		:= $(CURDIR)/microkit-smp
-MICROKIT_UNICORE     	:= $(CURDIR)/microkit-unicore
+MICROKIT_MULTIKERNEL 		:= $(CURDIR)/microkit-multikernel
+MICROKIT_CAPDL_MULTIKERNEL 	:= $(CURDIR)/microkit-capdl-multikernel
+MICROKIT_SMP      			:= $(CURDIR)/microkit-smp
+MICROKIT_UNICORE     		:= $(CURDIR)/microkit-unicore
 
 # ============================================================
 # Top-level targets
 # ============================================================
-.PHONY: all multikernel smp unicore \
+.PHONY: all multikernel smp unicore capdl-multikernel \
         setup setup-python setup-rust setup-submodules \
-        run run-multikernel run-smp run-unicore \
+        run run-multikernel run-smp run-unicore run-capdl-multikernel \
         clean reset \
-		link link-multikernel link-smp link-unicore
+		link link-multikernel link-smp link-unicore link-capdl-multikernel
 
-all: multikernel smp unicore
+all: multikernel smp unicore capdl-multikernel
 
 # ============================================================
 # Environment setup
@@ -57,7 +58,7 @@ setup-rust:
 	rustup component add rust-src --toolchain 1.94.0-x86_64-unknown-linux-gnu
 
 # Example to symlink into each microkit's example/ directory
-EXAMPLE ?= ppc-no-interference
+EXAMPLE ?= ppc-interference
 
 # ============================================================
 # Symlink helper (used by link-* targets)
@@ -82,9 +83,9 @@ endef
 # ============================================================
 # Symlink targets
 # ============================================================
-.PHONY: link link-multikernel link-smp link-unicore
+.PHONY: link link-multikernel link-smp link-unicore link-capdl-multikernel
 
-link: link-multikernel link-smp link-unicore
+link: link-multikernel link-smp link-unicore link-capdl-multikernel
 
 link-multikernel:
 	$(call create-symlink,$(MICROKIT_MULTIKERNEL))
@@ -95,6 +96,9 @@ link-smp:
 link-unicore:
 	$(call create-symlink,$(MICROKIT_UNICORE))
 
+link-capdl-multikernel:
+	$(call create-symlink,$(MICROKIT_CAPDL_MULTIKERNEL))
+
 # ============================================================
 # Submodule setup (calls link after patching)
 # ============================================================
@@ -104,12 +108,13 @@ setup-submodules:
 	cd $(MICROKIT_MULTIKERNEL) 	&& git am $(PATCHES)/multikernel/*
 	cd $(MICROKIT_SMP)        	&& git am $(PATCHES)/smp/*
 	cd $(MICROKIT_UNICORE)    	&& git am $(PATCHES)/unicore/*
+	cd $(MICROKIT_CAPDL_MULTIKERNEL) && git am $(PATCHES)/capdl-multikernel/*
 	$(MAKE) link
 
 # ============================================================
 # Build targets
 # ============================================================
-SYSTEM_FILE ?= benchmarks-four-cores.system
+SYSTEM_FILE := benchmarks-three-cores.system
 export SYSTEM_FILE
 
 multikernel: setup-submodules
@@ -117,6 +122,20 @@ multikernel: setup-submodules
 	cd $(MICROKIT_MULTIKERNEL) && \
 		$(PYTHON) build_sdk.py \
 			--sel4=../seL4-multikernel \
+			--boards $(MICROKIT_BOARD)_multikernel \
+			--configs $(MICROKIT_CONFIG) \
+			--skip-docs --skip-tar && \
+		$(PYTHON) dev_build.py \
+			--rebuild \
+			--example $(EXAMPLE) \
+			--board $(MICROKIT_BOARD)_multikernel \
+			--config $(MICROKIT_CONFIG)
+
+capdl-multikernel: setup-submodules
+	@echo ">>> Building capdl-multikernel (board=$(MICROKIT_BOARD)_multikernel, config=$(MICROKIT_CONFIG))..."
+	cd $(MICROKIT_CAPDL_MULTIKERNEL) && \
+		$(PYTHON) build_sdk.py \
+			--sel4=../seL4-capdl-multikernel \
 			--boards $(MICROKIT_BOARD)_multikernel \
 			--configs $(MICROKIT_CONFIG) \
 			--skip-docs --skip-tar && \
@@ -157,11 +176,18 @@ unicore: setup-submodules
 # ============================================================
 # Run targets
 # ============================================================
-run: run-multikernel run-smp run-unicore
+run: run-multikernel run-smp run-unicore run-capdl-multikernel
 
 run-multikernel:
 	@echo ">>> Running multikernel..."
 	cd $(MICROKIT_MULTIKERNEL) && \
+		$(MQ)/mq.sh run -s odroidc4_pool \
+			-f ./tmp_build/loader.img \
+			-c "All is well in the universe"
+
+run-capdl-multikernel:
+	@echo ">>> Running capdl-multikernel..."
+	cd $(MICROKIT_CAPDL_MULTIKERNEL) && \
 		$(MQ)/mq.sh run -s odroidc4_pool \
 			-f ./tmp_build/loader.img \
 			-c "All is well in the universe"
@@ -185,9 +211,11 @@ run-unicore:
 # ============================================================
 clean:
 	rm -rf $(MICROKIT_MULTIKERNEL)/build $(MICROKIT_MULTIKERNEL)/release
+	rm -rf $(MICROKIT_CAPDL_MULTIKERNEL)/build $(MICROKIT_CAPDL_MULTIKERNEL)/release
 	rm -rf $(MICROKIT_SMP)/build $(MICROKIT_SMP)/release
 	rm -rf $(MICROKIT_UNICORE)/build $(MICROKIT_UNICORE)/release
 	rm -rf $(MICROKIT_MULTIKERNEL)/tmp_build
+	rm -rf $(MICROKIT_CAPDL_MULTIKERNEL)/tmp_build
 	rm -rf $(MICROKIT_SMP)/tmp_build
 	rm -rf $(MICROKIT_UNICORE)/tmp_build
 
@@ -195,7 +223,7 @@ reset: clean
 	git submodule foreach --recursive 'git am --abort || true'
 	git submodule update --init --recursive --force
 	@echo ">>> Removing symlinks from submodule example directories..."
-	@for dir in $(MICROKIT_MULTIKERNEL) $(MICROKIT_SMP) $(MICROKIT_UNICORE); do \
+	@for dir in $(MICROKIT_MULTIKERNEL) $(MICROKIT_SMP) $(MICROKIT_UNICORE) $(MICROKIT_CAPDL_MULTIKERNEL); do \
 		if [ -d "$$dir/example" ]; then \
 			find "$$dir/example" -maxdepth 1 -type l -exec rm -v {} \; ; \
 		else \

@@ -1,0 +1,24 @@
+From dba77510325333c172cbe938a6fbc86cb3047b16 Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Tue, 7 Apr 2026 12:11:09 +1000
+Subject: [PATCH 3/3] make rustc happy
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ initialiser/support/targets/aarch64-sel4-minimal.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/initialiser/support/targets/aarch64-sel4-minimal.json b/initialiser/support/targets/aarch64-sel4-minimal.json
+index 46fc21a..96c14fa 100644
+--- a/initialiser/support/targets/aarch64-sel4-minimal.json
++++ b/initialiser/support/targets/aarch64-sel4-minimal.json
+@@ -30,5 +30,5 @@
+     "kcfi",
+     "kernel-address"
+   ],
+-  "target-pointer-width": "64"
++  "target-pointer-width": 64
+ }
+-- 
+2.43.0
+

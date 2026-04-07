@@ -1,0 +1,66 @@
+From 215f4784969001e676242a976aedf2c66818a26d Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Tue, 7 Apr 2026 12:09:05 +1000
+Subject: [PATCH 1/2] adjust kernel configs
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ build_sdk.py | 20 +++++++++++++-------
+ 1 file changed, 13 insertions(+), 7 deletions(-)
+
+diff --git a/build_sdk.py b/build_sdk.py
+index 9112edd..c74f183 100644
+--- a/build_sdk.py
++++ b/build_sdk.py
+@@ -249,9 +249,7 @@ SUPPORTED_BOARDS = (
+             "KernelPlatform": "odroidc4",
+             "KernelArmVtimerUpdateVOffset": False,
+             "KernelEnableMultikernelSupport": True,
+-            # TODO: Derive from device tree?
+-            # "KernelMultikernelNumCPUs": 4,
+-            "KernelMultikernelNumCPUs": 2,
++            "KernelMultikernelNumCPUs": 4,
+         } | DEFAULT_KERNEL_OPTIONS_AARCH64,
+     ),
+     BoardInfo(
+@@ -426,10 +424,13 @@ SUPPORTED_CONFIGS = (
+         name="release",
+         debug=False,
+         kernel_options={
+-            "KernelVerificationBuild": False,
+-            "KernelDebugBuild": True,
++            "HardwareDebugAPI": False,
++        },
++        kernel_options_arch={
++            KernelArch.AARCH64: {
++                "KernelArmExportPMUUser": True,
++            },
+         },
+-        kernel_options_arch={},
+     ),
+     ConfigInfo(
+         name="debug",
+@@ -439,7 +440,11 @@ SUPPORTED_CONFIGS = (
+             "KernelPrinting": True,
+             "KernelVerificationBuild": False
+         },
+-        kernel_options_arch={},
++        kernel_options_arch={
++            KernelArch.AARCH64: {
++                "KernelArmExportPMUUser": True,
++            },
++        },
+     ),
+     ConfigInfo(
+         name="benchmark",
+@@ -449,6 +454,7 @@ SUPPORTED_CONFIGS = (
+             "KernelVerificationBuild": False,
+             "KernelBenchmarks": "track_utilisation",
+             "KernelSignalFastpath": True,
++            "HardwareDebugAPI": False,
+         },
+         kernel_options_arch={
+             KernelArch.AARCH64: {
+-- 
+2.43.0
+
