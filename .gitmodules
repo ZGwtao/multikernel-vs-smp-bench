@@ -26,3 +26,7 @@
 	path = seL4-capdl-multikernel
 	url = https://github.com/au-ts/seL4.git
 	branch = multikernel_rebased
+[submodule "seL4-fgl"]
+	path = seL4-fgl
+	url = https://github.com/ZGwtao/seL4-kernel.git
+	branch = fgl-rebased
