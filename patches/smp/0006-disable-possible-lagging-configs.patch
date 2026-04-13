@@ -1,0 +1,39 @@
+From cba550b0c88e4176f6c190ecde3ddc81c66f739b Mon Sep 17 00:00:00 2001
+From: Zhu Guangtao <guangtaozhu@outlook.com>
+Date: Mon, 13 Apr 2026 14:39:20 +1000
+Subject: [PATCH 6/6] disable possible lagging configs
+
+Signed-off-by: Zhu Guangtao <guangtaozhu@outlook.com>
+---
+ build_sdk.py | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/build_sdk.py b/build_sdk.py
+index 1bc0e3a..57c5368 100644
+--- a/build_sdk.py
++++ b/build_sdk.py
+@@ -46,10 +46,10 @@ DEFAULT_KERNEL_OPTIONS = {
+ }
+ 
+ DEFAULT_KERNEL_OPTIONS_AARCH64 = {
+-    "KernelArmExportPCNTUser": True,
++    "KernelArmExportPCNTUser": False,
+     "KernelArmHypervisorSupport": True,
+     "KernelArmVtimerUpdateVOffset": False,
+-    "KernelAllowSMCCalls": True,
++    "KernelAllowSMCCalls": False,
+ } | DEFAULT_KERNEL_OPTIONS
+ 
+ DEFAULT_KERNEL_OPTIONS_RISCV64 = DEFAULT_KERNEL_OPTIONS
+@@ -442,7 +442,7 @@ SUPPORTED_CONFIGS = (
+         kernel_options={
+             "KernelDebugBuild": False,
+             "KernelVerificationBuild": False,
+-            "KernelBenchmarks": "track_utilisation",
++            "KernelBenchmarks": "generic",
+             "KernelSignalFastpath": True,
+             "HardwareDebugAPI": False,
+             "KernelMaxNumNodes": 4,
+-- 
+2.34.1
+

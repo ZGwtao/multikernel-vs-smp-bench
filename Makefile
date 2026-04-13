@@ -1,7 +1,7 @@
 # ============================================================
 # Configuration variables (override via CLI, e.g. make MICROKIT_BOARD=rpi4)
 # ============================================================
-MICROKIT_CONFIG ?= release
+MICROKIT_CONFIG ?= benchmark
 MICROKIT_BOARD  ?= odroidc4
 MQ              ?= $(HOME)/wsp/machine_queue
 PATCHES         := $(CURDIR)/patches
@@ -58,7 +58,7 @@ setup-rust:
 	rustup component add rust-src --toolchain 1.94.0-x86_64-unknown-linux-gnu
 
 # Example to symlink into each microkit's example/ directory
-EXAMPLE ?= ppc-interference
+EXAMPLE ?= ppc-no-interference
 
 # ============================================================
 # Symlink helper (used by link-* targets)

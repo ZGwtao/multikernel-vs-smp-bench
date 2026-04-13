@@ -1,0 +1,40 @@
+From 57c1e03a5432aa6d18c344ca277aa5eb703cee0e Mon Sep 17 00:00:00 2001
+From: Zhu Guangtao <guangtaozhu@outlook.com>
+Date: Mon, 13 Apr 2026 15:35:48 +1000
+Subject: [PATCH 5/5] fix configurations and please use benchmark mode
+
+Signed-off-by: Zhu Guangtao <guangtaozhu@outlook.com>
+---
+ build_sdk.py | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/build_sdk.py b/build_sdk.py
+index 04e2aaa..08a17e7 100644
+--- a/build_sdk.py
++++ b/build_sdk.py
+@@ -43,10 +43,10 @@ DEFAULT_KERNEL_OPTIONS = {
+ }
+ 
+ DEFAULT_KERNEL_OPTIONS_AARCH64 = {
+-    "KernelArmExportPCNTUser": True,
++    "KernelArmExportPCNTUser": False,
+     "KernelArmHypervisorSupport": True,
+     "KernelArmVtimerUpdateVOffset": False,
+-    "KernelAllowSMCCalls": True,
++    "KernelAllowSMCCalls": False,
+ } | DEFAULT_KERNEL_OPTIONS
+ 
+ DEFAULT_KERNEL_OPTIONS_RISCV64 = DEFAULT_KERNEL_OPTIONS
+@@ -381,7 +381,8 @@ SUPPORTED_CONFIGS = (
+         kernel_options={
+             "KernelDebugBuild": False,
+             "KernelVerificationBuild": False,
+-            "KernelBenchmarks": "track_utilisation"
++            "KernelBenchmarks": "generic",
++            "HardwareDebugAPI": False,
+         },
+         kernel_options_arch={
+             KernelArch.AARCH64: {
+-- 
+2.34.1
+
