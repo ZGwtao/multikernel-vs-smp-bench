@@ -1,0 +1,25 @@
+From 267fc2cbddf7b106c4eba8471397312d74fafc51 Mon Sep 17 00:00:00 2001
+From: Zhu Guangtao <guangtaozhu@outlook.com>
+Date: Mon, 13 Apr 2026 14:05:13 +1000
+Subject: [PATCH 5/5] disable verification build for release mode?
+
+Signed-off-by: Zhu Guangtao <guangtaozhu@outlook.com>
+---
+ build_sdk.py | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/build_sdk.py b/build_sdk.py
+index 9d6c600..1bc0e3a 100644
+--- a/build_sdk.py
++++ b/build_sdk.py
+@@ -412,6 +412,7 @@ SUPPORTED_CONFIGS = (
+             "HardwareDebugAPI": False,
+             "KernelMaxNumNodes": 4,
+             "KernelEnableSMPSupport": True,
++            "KernelVerificationBuild": False,
+         },
+         kernel_options_arch={
+             KernelArch.AARCH64: {
+-- 
+2.34.1
+
