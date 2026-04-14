@@ -1,0 +1,6 @@
+
+unicore: 688 cycles
+smp: 1113 cycles
+multikernel: 694 cycles
+
+
