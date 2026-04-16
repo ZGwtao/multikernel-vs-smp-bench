@@ -37,3 +37,12 @@ seL4-14.0.0
             unicore: 649 cycles
             smp: 860 cycles
 
+cross-address-spaces
+    seL4-14.0.0
+        seL4_Libs-based performance: (virtualisation-enabled)
+            unicore: 699 cycles
+            smp: 1094 cycles
+        microkit-based performance: (virtualisation-enabled)
+            unicore: 688 cycles
+            smp: 1113 cycles
+            multikernel: 694 
