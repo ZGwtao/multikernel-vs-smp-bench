@@ -1,6 +1,39 @@
 
-unicore: 688 cycles
-smp: 1113 cycles
-multikernel: 694 cycles
+microkit-based performance: (cross-address-spaces, virtualisation-enabled)
+    unicore: 688 cycles
+    smp: 1113 cycles
+    multikernel: 694 cycles
 
+seL4-13.0.0
+    cross-address-spaces
+        seL4_Libs-based performance: (virtualisation-enabled)
+            unicore: 647 cycles
+            smp: 1102 cycles
+        seL4_Libs-based performance: (no virtualisation)
+            unicore: 632 cycles
+            smp: 887 cycles
+
+    same-address-spaces:
+        seL4_Libs-based performance: (virtualisation-enabled)
+            unicore: 617 cycles
+            smp: 954 cycles
+        seL4_Libs-based performance: (no virtualisation)
+            unicore: 601 cycles
+            smp: 878 cycles
+
+seL4-14.0.0
+    cross-address-spaces
+        seL4_Libs-based performance: (virtualisation-enabled)
+            unicore: 699 cycles
+            smp: 1094 cycles
+        seL4_Libs-based performance: (no virtualisation)
+            unicore: 676 cycles
+            smp: 877 cycles
+    single-address-spaces:
+        seL4_Libs-based performance: (virtualisation-enabled)
+            unicore: 666 cycles
+            smp: 947 cycles
+        seL4_Libs-based performance: (no virtualisation)
+            unicore: 649 cycles
+            smp: 860 cycles
 
