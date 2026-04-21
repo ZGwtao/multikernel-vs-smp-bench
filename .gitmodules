@@ -30,3 +30,7 @@
 	path = seL4-fgl
 	url = https://github.com/ZGwtao/seL4-kernel.git
 	branch = fgl-rebased
+[submodule "rust-seL4"]
+	path = rust-seL4
+	url = https://github.com/ZGwtao/rust-sel4.git
+	branch = multikernel

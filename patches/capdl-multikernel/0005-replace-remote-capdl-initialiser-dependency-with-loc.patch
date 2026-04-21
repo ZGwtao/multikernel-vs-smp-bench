@@ -1,0 +1,27 @@
+From a995fee3a48849b9607cc7c33e1862fedcc093e8 Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Tue, 21 Apr 2026 11:16:19 +1000
+Subject: [PATCH 5/5] replace remote capdl initialiser dependency with local
+ source
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ Cargo.toml | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/Cargo.toml b/Cargo.toml
+index 2da7993..5748180 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -20,3 +20,7 @@ git = "https://github.com/au-ts/rust-seL4"
+ branch = "multikernel"
+ [profile.release.package.microkit-tool]
+ strip = true
++
++[patch."https://github.com/au-ts/rust-seL4"]
++sel4-capdl-initializer = { path = "../rust-seL4/crates/sel4-capdl-initializer" }
++sel4-capdl-initializer-types = { path = "../rust-seL4/crates/sel4-capdl-initializer/types" }
+\ No newline at end of file
+-- 
+2.43.0
+
