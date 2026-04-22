@@ -1,0 +1,57 @@
+
+
+builders:
+    build_capdl_spec -> add_elf_to_spec -> create_vspace
+        + create a metadata
+        + records the necessary info to retype an untyped
+        + no real action performed
+
+main:
+    main
+        -> loop (for each multikernel node)
+            -> build_capdl_spec
+
+capdl-initialiser:
+    lib_main -> run
+        -> create_objects
+            + use the metadata from above
+            + retype an untyped into a vspace (root pagetable)
+
+            -> ...
+            -> init_vspaces
+
+x86_ept
+
+untyped info is passed from BootInfo
+-> looks like the kernel takes 'avail_p_regs = ram_regions' from BootInfo
+
+ref: microkit/tool/microkit/src/sel4.rs
+     + build_full_system_state
+对于每个核心：
+    + 可用的内存 = 内核内存 + 1/n 非共享内存 + 共享的内存
+    + 所有的内存会以上述形式在不同的核心之间均分
+
+对于每一块共享的物理内存：
+    + 在 system description file 里进行指定
+    + 如果有指定 paddr 则直接进行安全检查后分配到 shared_memory_phys_regions 里
+    + 如果没有指定则从所有可用物理内存的高位从后往前进行分配
+
+Q. 设置这个 shared memory phys regions 有什么用？
+
+per_core_ram_regions -> 不包含共享内存的部分
+shared_memory_phys_regions -> 另一传给 loader 的部分
+sys_memory_regions -> 所有由 sdf 指定的 memory regions
+
+loader
+    + 对于 per_core_ram_regions，非当前核心的设置为 reserved_regions
+    + 当前核心的取出 kernel, root_task, ram_regions
+    + kernel, root_task, ram_regions, reserved_regions 只适用于初始化 kernel_bootinfos
+    剩余的部分：regions
+        + region_metadata 会包含 shared_memory 的部分
+        + all_regions 只会包含 kernel + root_task 的部分
+
+kernel:
+    + 内核可以知晓哪些内存会被设置成 free_mem，哪些为 reserved_regions
+    + free_mem 与 reserved_regions 都属于 untyped
+    + free_mem 上的 untyped 属于 main memory，能够 retype 成任意内核对象
+    + reserved_regions 上的 untyped 属于 device memory，只能用来创建 page
