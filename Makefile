@@ -14,13 +14,15 @@ MICROKIT_CAPDL_MULTIKERNEL 	:= $(CURDIR)/microkit-capdl-multikernel
 MICROKIT_SMP      			:= $(CURDIR)/microkit-smp
 MICROKIT_UNICORE     		:= $(CURDIR)/microkit-unicore
 
+KERNEL_CAPDL_MULTIKERNEL 	:= $(CURDIR)/seL4-capdl-multikernel
+
 # ============================================================
 # Top-level targets
 # ============================================================
 .PHONY: all multikernel smp unicore capdl-multikernel \
         setup setup-python setup-rust setup-submodules \
         run run-multikernel run-smp run-unicore run-capdl-multikernel \
-        clean reset reset-capdl-multikernel \
+        clean reset setup-capdl-multikernel \
 		link link-multikernel link-smp link-unicore link-capdl-multikernel
 
 all: multikernel smp unicore capdl-multikernel
@@ -221,7 +223,7 @@ clean:
 	rm -rf $(MICROKIT_SMP)/tmp_build
 	rm -rf $(MICROKIT_UNICORE)/tmp_build
 
-reset-capdl-multikernel:
+setup-capdl-multikernel:
 	cd $(MICROKIT_CAPDL_MULTIKERNEL) && git am --abort || true
 	cd $(MICROKIT_CAPDL_MULTIKERNEL) && git reset --hard HEAD
 	cd $(MICROKIT_CAPDL_MULTIKERNEL) && git clean -fdx
@@ -233,6 +235,7 @@ reset-capdl-multikernel:
 		echo "INFO: No symlink found in $(MICROKIT_CAPDL_MULTIKERNEL)/example/, skipping."; \
 	fi
 	git submodule update --init --recursive --force -- $(MICROKIT_CAPDL_MULTIKERNEL)
+	git submodule update --init --recursive --force -- $(KERNEL_CAPDL_MULTIKERNEL)
 	$(call create-symlink,$(MICROKIT_CAPDL_MULTIKERNEL))
 	@echo ">>> Reset complete for capdl-multikernel."
 
