@@ -55,3 +55,24 @@ kernel:
     + free_mem 与 reserved_regions 都属于 untyped
     + free_mem 上的 untyped 属于 main memory，能够 retype 成任意内核对象
     + reserved_regions 上的 untyped 属于 device memory，只能用来创建 page
+
+
+Design:
+    + 每个页表结构都需要使用共享的内存区域
+    + 但是在构建 system 状态时，每个 pd 的页表结构是未知的
+    + 所以在划分内存区域（构建 system 状态）时，我们无法预留出适合每个 pd 的内存数目
+    + 因此，我们需要先对所有的 pd 创建一个 shadow page table
+    + 等于是说提前模拟页表的创建过程 获取为所有页表共享的 pd 创建内存区域
+    + 然后将这个需求加入到 system 状态构建过程之中
+    + 在此之后，system 状态构建时，要把这些用于创建页表结构的内存区域划分为 free_mem
+    + 但是由于内存区域指定，且系统使用静态架构，页表的结构不会在运行过程中消失
+    + ）但这样其实超级复杂不是吗？？
+
++ ref: add_elf_to_spec
+      + add emulate in front of 'build_full_system_state'
+emulate_pd_pagetable_struct
+    + capdl initialiser -> invokes self.init_frames
+    + frames caps (described) in microkit/tool, but created in capdl initialiser
+        + tool/microkit/src/capdl/utils -> capdl_util_make_frame_obj
+        + tool/microkit/src/capdl/utils -> capdl_util_make_frame_cap
+
