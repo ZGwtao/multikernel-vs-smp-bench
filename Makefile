@@ -14,6 +14,8 @@ MICROKIT_CAPDL_MULTIKERNEL 	:= $(CURDIR)/microkit-capdl-multikernel
 MICROKIT_SMP      			:= $(CURDIR)/microkit-smp
 MICROKIT_UNICORE     		:= $(CURDIR)/microkit-unicore
 
+RUST_SEL4 					:= $(CURDIR)/rust-seL4
+
 KERNEL_CAPDL_MULTIKERNEL 	:= $(CURDIR)/seL4-capdl-multikernel
 
 # ============================================================
@@ -61,6 +63,7 @@ setup-rust:
 
 # Example to symlink into each microkit's example/ directory
 EXAMPLE ?= ppc-no-interference
+EXAMPLE_PASSIVE_SERVER ?= multikernel-passive-server
 
 # ============================================================
 # Symlink helper (used by link-* targets)
@@ -133,19 +136,17 @@ multikernel: setup-submodules
 			--board $(MICROKIT_BOARD)_multikernel \
 			--config $(MICROKIT_CONFIG)
 
-# FIXME
-# capdl-multikernel: setup-submodules
-capdl-multikernel:
+capdl-multikernel: setup-capdl-multikernel
 	@echo ">>> Building capdl-multikernel (board=$(MICROKIT_BOARD)_multikernel, config=$(MICROKIT_CONFIG))..."
 	cd $(MICROKIT_CAPDL_MULTIKERNEL) && \
 		$(PYTHON) build_sdk.py \
-			--sel4=../seL4-capdl-multikernel \
+			--sel4=$(KERNEL_CAPDL_MULTIKERNEL) \
 			--boards $(MICROKIT_BOARD)_multikernel \
 			--configs $(MICROKIT_CONFIG) \
 			--skip-docs --skip-tar && \
 		$(PYTHON) dev_build.py \
 			--rebuild \
-			--example $(EXAMPLE) \
+			--example $(EXAMPLE_PASSIVE_SERVER) \
 			--board $(MICROKIT_BOARD)_multikernel \
 			--config $(MICROKIT_CONFIG)
 
@@ -236,6 +237,7 @@ setup-capdl-multikernel:
 	fi
 	git submodule update --init --recursive --force -- $(MICROKIT_CAPDL_MULTIKERNEL)
 	git submodule update --init --recursive --force -- $(KERNEL_CAPDL_MULTIKERNEL)
+	git submodule update --init --recursive --force -- $(RUST_SEL4)
 	$(call create-symlink,$(MICROKIT_CAPDL_MULTIKERNEL))
 	@echo ">>> Reset complete for capdl-multikernel."
 
