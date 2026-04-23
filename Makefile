@@ -20,7 +20,7 @@ MICROKIT_UNICORE     		:= $(CURDIR)/microkit-unicore
 .PHONY: all multikernel smp unicore capdl-multikernel \
         setup setup-python setup-rust setup-submodules \
         run run-multikernel run-smp run-unicore run-capdl-multikernel \
-        clean reset \
+        clean reset reset-capdl-multikernel \
 		link link-multikernel link-smp link-unicore link-capdl-multikernel
 
 all: multikernel smp unicore capdl-multikernel
@@ -108,7 +108,7 @@ setup-submodules:
 	cd $(MICROKIT_MULTIKERNEL) 	&& git am $(PATCHES)/multikernel/*
 	cd $(MICROKIT_SMP)        	&& git am $(PATCHES)/smp/*
 	cd $(MICROKIT_UNICORE)    	&& git am $(PATCHES)/unicore/*
-	cd $(MICROKIT_CAPDL_MULTIKERNEL) && git am $(PATCHES)/capdl-multikernel/*
+#	cd $(MICROKIT_CAPDL_MULTIKERNEL) && git am $(PATCHES)/capdl-multikernel/*
 	$(MAKE) link
 
 # ============================================================
@@ -131,7 +131,9 @@ multikernel: setup-submodules
 			--board $(MICROKIT_BOARD)_multikernel \
 			--config $(MICROKIT_CONFIG)
 
-capdl-multikernel: setup-submodules
+# FIXME
+# capdl-multikernel: setup-submodules
+capdl-multikernel:
 	@echo ">>> Building capdl-multikernel (board=$(MICROKIT_BOARD)_multikernel, config=$(MICROKIT_CONFIG))..."
 	cd $(MICROKIT_CAPDL_MULTIKERNEL) && \
 		$(PYTHON) build_sdk.py \
@@ -218,6 +220,21 @@ clean:
 	rm -rf $(MICROKIT_CAPDL_MULTIKERNEL)/tmp_build
 	rm -rf $(MICROKIT_SMP)/tmp_build
 	rm -rf $(MICROKIT_UNICORE)/tmp_build
+
+reset-capdl-multikernel:
+	cd $(MICROKIT_CAPDL_MULTIKERNEL) && git am --abort || true
+	cd $(MICROKIT_CAPDL_MULTIKERNEL) && git reset --hard HEAD
+	cd $(MICROKIT_CAPDL_MULTIKERNEL) && git clean -fdx
+	cd $(CURDIR) && rm -rf $(MICROKIT_CAPDL_MULTIKERNEL)/tmp_build
+	@echo ">>> Removing symlink from $(MICROKIT_CAPDL_MULTIKERNEL)/example/$(EXAMPLE)..."
+	@if [ -L "$(MICROKIT_CAPDL_MULTIKERNEL)/example/$(EXAMPLE)" ]; then \
+		rm -v $(MICROKIT_CAPDL_MULTIKERNEL)/example/$(EXAMPLE); \
+	else \
+		echo "INFO: No symlink found in $(MICROKIT_CAPDL_MULTIKERNEL)/example/, skipping."; \
+	fi
+	git submodule update --init --recursive --force -- $(MICROKIT_CAPDL_MULTIKERNEL)
+	$(call create-symlink,$(MICROKIT_CAPDL_MULTIKERNEL))
+	@echo ">>> Reset complete for capdl-multikernel."
 
 reset: clean
 	git submodule foreach --recursive 'git am --abort || true'

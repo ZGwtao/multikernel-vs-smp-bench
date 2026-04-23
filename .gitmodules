@@ -13,7 +13,7 @@
 [submodule "microkit-capdl-multikernel"]
 	path = microkit-capdl-multikernel
 	url = https://github.com/ZGwtao/microkit.git
-	branch = capdl_multikernel
+	branch = multikernel-dev
 [submodule "microkit-smp"]
 	path = microkit-smp
 	url = https://github.com/au-ts/microkit.git
