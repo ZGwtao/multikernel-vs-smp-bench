@@ -67,20 +67,20 @@ EXAMPLE_PASSIVE_SERVER ?= multikernel-passive-server
 
 # ============================================================
 # Symlink helper (used by link-* targets)
-# Usage: $(call create-symlink, <microkit-dir>)
+# Usage: $(call create-symlink, <microkit-dir>, <example-name>)
 # ============================================================
 define create-symlink
-	@echo ">>> Creating symlink: $(1)/example/$(EXAMPLE) -> $(CURDIR)/$(EXAMPLE)..."
-	@if [ ! -d "$(CURDIR)/$(EXAMPLE)" ] && [ ! -f "$(CURDIR)/$(EXAMPLE)" ]; then \
-		echo "ERROR: Source '$(CURDIR)/$(EXAMPLE)' does not exist, aborting."; \
+	@echo ">>> Creating symlink: $(1)/example/$(2) -> $(CURDIR)/$(2)..."
+	@if [ ! -d "$(CURDIR)/$(2)" ] && [ ! -f "$(CURDIR)/$(2)" ]; then \
+		echo "ERROR: Source '$(CURDIR)/$(2)' does not exist, aborting."; \
 		exit 1; \
-	elif [ -L "$(1)/example/$(EXAMPLE)" ]; then \
+	elif [ -L "$(1)/example/$(2)" ]; then \
 		echo "INFO: Symlink already exists in $(1)/example/, skipping."; \
-	elif [ -e "$(1)/example/$(EXAMPLE)" ]; then \
-		echo "ERROR: '$(1)/example/$(EXAMPLE)' exists but is not a symlink, please remove it manually."; \
+	elif [ -e "$(1)/example/$(2)" ]; then \
+		echo "ERROR: '$(1)/example/$(2)' exists but is not a symlink, please remove it manually."; \
 		exit 1; \
 	else \
-		ln -s $(CURDIR)/$(EXAMPLE) $(1)/example/$(EXAMPLE); \
+		ln -s $(CURDIR)/$(2) $(1)/example/$(2); \
 		echo "INFO: Symlink created in $(1)/example/."; \
 	fi
 endef
@@ -93,16 +93,16 @@ endef
 link: link-multikernel link-smp link-unicore link-capdl-multikernel
 
 link-multikernel:
-	$(call create-symlink,$(MICROKIT_MULTIKERNEL))
+	$(call create-symlink,$(MICROKIT_MULTIKERNEL),$(EXAMPLE))
 
 link-smp:
-	$(call create-symlink,$(MICROKIT_SMP))
+	$(call create-symlink,$(MICROKIT_SMP),$(EXAMPLE))
 
 link-unicore:
-	$(call create-symlink,$(MICROKIT_UNICORE))
+	$(call create-symlink,$(MICROKIT_UNICORE),$(EXAMPLE))
 
 link-capdl-multikernel:
-	$(call create-symlink,$(MICROKIT_CAPDL_MULTIKERNEL))
+	$(call create-symlink,$(MICROKIT_CAPDL_MULTIKERNEL),$(EXAMPLE_PASSIVE_SERVER))
 
 # ============================================================
 # Submodule setup (calls link after patching)
@@ -238,7 +238,7 @@ setup-capdl-multikernel:
 	git submodule update --init --recursive --force -- $(MICROKIT_CAPDL_MULTIKERNEL)
 	git submodule update --init --recursive --force -- $(KERNEL_CAPDL_MULTIKERNEL)
 	git submodule update --init --recursive --force -- $(RUST_SEL4)
-	$(call create-symlink,$(MICROKIT_CAPDL_MULTIKERNEL))
+	$(call create-symlink,$(MICROKIT_CAPDL_MULTIKERNEL),$(EXAMPLE_PASSIVE_SERVER))
 	@echo ">>> Reset complete for capdl-multikernel."
 
 reset: clean
