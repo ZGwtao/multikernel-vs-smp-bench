@@ -181,28 +181,28 @@ run: run-multikernel run-smp run-unicore run-capdl-multikernel
 run-multikernel:
 	@echo ">>> Running multikernel..."
 	cd $(MICROKIT_MULTIKERNEL) && \
-		$(MQ)/mq.sh run -s odroidc4_pool \
+		$(MQ)/mq.sh run -s $(MICROKIT_BOARD)_pool \
 			-f ./tmp_build/loader.img \
 			-c "All is well in the universe"
 
 run-capdl-multikernel:
 	@echo ">>> Running capdl-multikernel..."
 	cd $(MICROKIT_CAPDL_MULTIKERNEL) && \
-		$(MQ)/mq.sh run -s odroidc4_pool \
+		$(MQ)/mq.sh run -s $(MICROKIT_BOARD)_pool \
 			-f ./tmp_build/loader.img \
 			-c "All is well in the universe"
 
 run-smp:
 	@echo ">>> Running smp..."
 	cd $(MICROKIT_SMP) && \
-		$(MQ)/mq.sh run -s odroidc4_pool \
+		$(MQ)/mq.sh run -s $(MICROKIT_BOARD)_pool \
 			-f ./tmp_build/loader.img \
 			-c "All is well in the universe"
 
 run-unicore:
 	@echo ">>> Running unicore..."
 	cd $(MICROKIT_UNICORE) && \
-		$(MQ)/mq.sh run -s odroidc4_pool \
+		$(MQ)/mq.sh run -s $(MICROKIT_BOARD)_pool \
 			-f ./tmp_build/loader.img \
 			-c "All is well in the universe"
 
