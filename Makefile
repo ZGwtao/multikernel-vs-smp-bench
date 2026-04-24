@@ -1,7 +1,7 @@
 # ============================================================
 # Configuration variables (override via CLI, e.g. make MICROKIT_BOARD=rpi4)
 # ============================================================
-MICROKIT_CONFIG ?= benchmark
+MICROKIT_CONFIG ?= debug
 MICROKIT_BOARD  ?= odroidc4
 MQ              ?= $(HOME)/wsp/machine_queue
 PATCHES         := $(CURDIR)/patches
@@ -25,6 +25,7 @@ KERNEL_CAPDL_MULTIKERNEL 	:= $(CURDIR)/seL4-capdl-multikernel
         setup setup-python setup-rust setup-submodules \
         run run-multikernel run-smp run-unicore run-capdl-multikernel \
         clean reset setup-capdl-multikernel \
+		build-capdl-multikernel test-capdl-multikernel \
 		link link-multikernel link-smp link-unicore link-capdl-multikernel
 
 all: multikernel smp unicore capdl-multikernel
@@ -144,6 +145,28 @@ capdl-multikernel: setup-capdl-multikernel
 			--boards $(MICROKIT_BOARD)_multikernel \
 			--configs $(MICROKIT_CONFIG) \
 			--skip-docs --skip-tar && \
+		$(PYTHON) dev_build.py \
+			--rebuild \
+			--example $(EXAMPLE_PASSIVE_SERVER) \
+			--board $(MICROKIT_BOARD)_multikernel \
+			--config $(MICROKIT_CONFIG)
+
+build-capdl-multikernel:
+	@echo ">>> Building capdl-multikernel (board=$(MICROKIT_BOARD)_multikernel, config=$(MICROKIT_CONFIG))..."
+	cd $(MICROKIT_CAPDL_MULTIKERNEL) && \
+		$(PYTHON) build_sdk.py \
+			--sel4=$(KERNEL_CAPDL_MULTIKERNEL) \
+			--boards $(MICROKIT_BOARD)_multikernel \
+			--configs $(MICROKIT_CONFIG) \
+			--skip-docs --skip-tar && \
+		$(PYTHON) dev_build.py \
+			--rebuild \
+			--example $(EXAMPLE_PASSIVE_SERVER) \
+			--board $(MICROKIT_BOARD)_multikernel \
+			--config $(MICROKIT_CONFIG)
+
+test-capdl-multikernel:
+	cd $(MICROKIT_CAPDL_MULTIKERNEL) && \
 		$(PYTHON) dev_build.py \
 			--rebuild \
 			--example $(EXAMPLE_PASSIVE_SERVER) \
