@@ -1,0 +1,28 @@
+From 3ac47b018d35fc1d593a1996bb16c3683cd910fa Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Mon, 27 Apr 2026 13:26:58 +1000
+Subject: [PATCH] hack: allow users to create pagetable structures out of
+ device untyped
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ src/arch/arm/64/object/objecttype.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/arch/arm/64/object/objecttype.c b/src/arch/arm/64/object/objecttype.c
+index 192ac300..0c9ecc01 100644
+--- a/src/arch/arm/64/object/objecttype.c
++++ b/src/arch/arm/64/object/objecttype.c
+@@ -22,6 +22,9 @@ bool_t Arch_isFrameType(word_t type)
+         return true;
+     case seL4_ARM_HugePageObject:
+         return true;
++    case seL4_ARM_PageTableObject:
++    case seL4_ARM_VSpaceObject:
++        return true;
+     default:
+         return false;
+     }
+-- 
+2.43.0
+
