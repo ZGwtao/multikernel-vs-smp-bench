@@ -259,8 +259,9 @@ setup-capdl-multikernel:
 		echo "INFO: No symlink found in $(MICROKIT_CAPDL_MULTIKERNEL)/example/, skipping."; \
 	fi
 	git submodule update --init --recursive --force -- $(MICROKIT_CAPDL_MULTIKERNEL)
+	cd $(MICROKIT_CAPDL_MULTIKERNEL) && git am $(PATCHES)/capdl-multikernel/*
 	git submodule update --init --recursive --force -- $(KERNEL_CAPDL_MULTIKERNEL)
-	cd $(KERNEL_CAPDL_MULTIKERNEL) && git am $(PATCHES)/kernel/capdl-multikernel/*
+#	cd $(KERNEL_CAPDL_MULTIKERNEL) && git am $(PATCHES)/kernel/capdl-multikernel/*
 	git submodule update --init --recursive --force -- $(RUST_SEL4)
 	$(call create-symlink,$(MICROKIT_CAPDL_MULTIKERNEL),$(EXAMPLE_PASSIVE_SERVER))
 	@echo ">>> Reset complete for capdl-multikernel."
