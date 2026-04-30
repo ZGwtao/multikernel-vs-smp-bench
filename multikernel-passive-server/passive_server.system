@@ -5,9 +5,7 @@
  SPDX-License-Identifier: BSD-2-Clause
 -->
 <system>
-    <pagetable name="shared_pagetable" />
-
-    <protection_domain name="server_core0" priority="100" passive="true" cpu="0" pagetable="shared_pagetable">
+    <protection_domain name="server_core0" priority="100" passive="true" cpu="0">
         <program_image path="server_shared.elf" />
     </protection_domain>
 
@@ -20,7 +18,7 @@
         <end pd="client_core0" id="0" pp="true" />
     </channel>
 
-    <protection_domain name="server_core1" priority="100" passive="true" cpu="1" pagetable="shared_pagetable">
+    <protection_domain name="server_core1" priority="100" passive="true" cpu="1">
         <program_image path="server_shared.elf" />
     </protection_domain>
 
@@ -31,6 +29,11 @@
     <channel>
         <end pd="server_core1" id="0" />
         <end pd="client_core1" id="0" pp="true" />
+    </channel>
+
+    <channel>
+        <end pd="client_core0" id="1" />
+        <end pd="client_core1" id="1" />
     </channel>
 
 
