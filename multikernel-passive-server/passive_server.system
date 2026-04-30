@@ -5,8 +5,11 @@
  SPDX-License-Identifier: BSD-2-Clause
 -->
 <system>
+    <memory_region name="shared_region" size="0x1000" page_size="0x1000" />
+
     <protection_domain name="server_core0" priority="100" passive="true" cpu="0">
         <program_image path="server_shared.elf" />
+        <map mr="shared_region" vaddr="0xffc00000" perms="rw" cached="true" setvar_vaddr="shared_region_vaddr" />
     </protection_domain>
 
     <protection_domain name="client_core0" priority="99" cpu="0">
@@ -14,12 +17,13 @@
     </protection_domain>
 
     <channel>
-        <end pd="server_core0" id="0" />
+        <end pd="server_core0" id="5" />
         <end pd="client_core0" id="0" pp="true" />
     </channel>
 
     <protection_domain name="server_core1" priority="100" passive="true" cpu="1">
         <program_image path="server_shared.elf" />
+        <map mr="shared_region" vaddr="0xffc00000" perms="rw" cached="true" setvar_vaddr="shared_region_vaddr" />
     </protection_domain>
 
     <protection_domain name="client_core1" priority="99" cpu="1">
@@ -27,7 +31,7 @@
     </protection_domain>
 
     <channel>
-        <end pd="server_core1" id="0" />
+        <end pd="server_core1" id="6" />
         <end pd="client_core1" id="0" pp="true" />
     </channel>
 

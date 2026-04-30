@@ -21,9 +21,10 @@ void notified(microkit_channel ch)
     microkit_dbg_puts("CLIENT_CORE0|INFO: received SGI from core 1\n");
 
     /* message the server */
-    int runs = 3;
-    while (runs--) {
-        microkit_dbg_puts("client 0 - call server on 0\n");
+    // int runs = 3;
+    // while (runs--) {
+        // microkit_dbg_puts("client 0 - call server on 0\n");
+    while (1) {
         (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(1, 1));
     }
 }

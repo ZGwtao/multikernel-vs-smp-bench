@@ -26,4 +26,9 @@ void notified(microkit_channel ch)
     }
 
     microkit_notify(REMOTE_CH);
+
+    while (1) {
+        // microkit_dbg_puts("client 1 - call server on 1\n");
+        (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(1, 1));
+    }
 }
