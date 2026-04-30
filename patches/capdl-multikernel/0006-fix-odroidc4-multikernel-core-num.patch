@@ -1,0 +1,26 @@
+From 2e2607086f04629cbb1df280c7d9eed4266ca32b Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Thu, 30 Apr 2026 11:35:54 +1000
+Subject: [PATCH 6/6] fix odroidc4 multikernel core num
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ build_sdk.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/build_sdk.py b/build_sdk.py
+index c74f183..1716b43 100644
+--- a/build_sdk.py
++++ b/build_sdk.py
+@@ -249,7 +249,7 @@ SUPPORTED_BOARDS = (
+             "KernelPlatform": "odroidc4",
+             "KernelArmVtimerUpdateVOffset": False,
+             "KernelEnableMultikernelSupport": True,
+-            "KernelMultikernelNumCPUs": 4,
++            "KernelMultikernelNumCPUs": 2,
+         } | DEFAULT_KERNEL_OPTIONS_AARCH64,
+     ),
+     BoardInfo(
+-- 
+2.43.0
+
