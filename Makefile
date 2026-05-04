@@ -64,7 +64,9 @@ setup-rust:
 
 # Example to symlink into each microkit's example/ directory
 EXAMPLE ?= ppc-no-interference
-EXAMPLE_PASSIVE_SERVER ?= multikernel-passive-server
+# EXAMPLE_PASSIVE_SERVER ?= multikernel-passive-server
+EXAMPLE_PASSIVE_SERVER ?= smp-passive-server
+EXAMPLE := $(EXAMPLE_PASSIVE_SERVER)
 
 # ============================================================
 # Symlink helper (used by link-* targets)

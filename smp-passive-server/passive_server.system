@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright 2022, UNSW
+
+ SPDX-License-Identifier: BSD-2-Clause
+-->
+<system>
+    <protection_domain name="server_shared" priority="100" passive="true">
+        <program_image path="server_shared.elf" />
+    </protection_domain>
+
+    <protection_domain name="client_core0" priority="99" cpu="0">
+        <program_image path="client_core0.elf" />
+    </protection_domain>
+
+    <protection_domain name="client_core1" priority="99" cpu="1">
+        <program_image path="client_core1.elf" />
+    </protection_domain>
+
+    <channel>
+        <end pd="server_shared" id="5" />
+        <end pd="client_core0" id="0" pp="true" />
+    </channel>
+
+    <channel>
+        <end pd="server_shared" id="6" />
+        <end pd="client_core1" id="0" pp="true" />
+    </channel>
+
+
+    <channel>
+        <end pd="client_core0" id="1" />
+        <end pd="client_core1" id="1" />
+    </channel>
+
+
+</system>
