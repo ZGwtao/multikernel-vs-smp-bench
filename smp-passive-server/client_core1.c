@@ -6,8 +6,8 @@
 
 #include <microkit.h>
 
-#define SERVER_CH 0
-#define REMOTE_CH 1
+#define SERVER_CH 10
+#define REMOTE_CH 2
 
 void init(void)
 {
@@ -16,19 +16,20 @@ void init(void)
 
 void notified(microkit_channel ch)
 {
-    microkit_dbg_puts("CLIENT_CORE1|INFO: received SGI from core 0\n");
+    microkit_dbg_puts("CLIENT_CORE1|INFO: received notification from core 0\n");
 
-    /* message the server */
-    int runs = 3;
-    while (runs--) {
-        microkit_dbg_puts("client 1 - call server on 1\n");
-        (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(1, 1));
-    }
+    microkit_dbg_puts("client 1: call server\n");
+    // for (int i = 0; i < 5; ++i) {
+        // microkit_notify(REMOTE_CH);
+        (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(0, 0));
+        microkit_notify(REMOTE_CH);
+    // }
 
-    microkit_notify(REMOTE_CH);
+    // microkit_dbg_puts("CLIENT_CORE1|INFO: done initial calls to server, now notifying core 0\n");
+    // microkit_notify(REMOTE_CH);
 
-    while (1) {
-        // microkit_dbg_puts("client 1 - call server on 1\n");
-        (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(1, 1));
-    }
+    // while (1) {
+    //     microkit_dbg_puts("client 1 - call server on 1\n");
+    //     (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(0, 0));
+    // }
 }
