@@ -21,6 +21,10 @@ void notified(microkit_channel ch)
 #if 1
     microkit_notify(REMOTE_CH);
     for (;;) {
+        for (int i = 0; i < 1000; i++) {
+            /* busy wait to increase the chance of preemption */
+            asm volatile("nop");
+        }
         (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(0, 0));
     }
 #else

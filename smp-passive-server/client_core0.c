@@ -26,10 +26,14 @@ void notified(microkit_channel ch)
     microkit_dbg_puts("client 0 - call server on 0\n");
 #if 1
     for (;;) {
+        for (int i = 0; i < 1000; i++) {
+            /* busy wait to increase the chance of preemption */
+            asm volatile("nop");
+        }
         (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(0, 0));
     }
 #else
-    (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(0, 0));
     microkit_notify(REMOTE_CH);
+    (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(0, 0));
 #endif
 }
