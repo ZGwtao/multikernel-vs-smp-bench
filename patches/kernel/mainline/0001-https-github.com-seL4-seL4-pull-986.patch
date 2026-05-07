@@ -1,0 +1,83 @@
+From 768b21c5c1f9b1792d7c129dc38743f4d2bd0817 Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Thu, 7 May 2026 12:45:56 +1000
+Subject: [PATCH] https://github.com/seL4/seL4/pull/986
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ include/object/tcb.h  | 11 ++++++++++-
+ src/kernel/thread.c   |  6 ++++--
+ src/object/endpoint.c |  5 +++++
+ 3 files changed, 19 insertions(+), 3 deletions(-)
+
+diff --git a/include/object/tcb.h b/include/object/tcb.h
+index c2226a120..a886f4408 100644
+--- a/include/object/tcb.h
++++ b/include/object/tcb.h
+@@ -119,13 +119,22 @@ void remoteTCBStall(tcb_t *tcb);
+     remoteQueueUpdate(_t);          \
+ } while (0)
+ 
++#define SCHED_ENQUEUE_CURRENT_TCB do {                                    \
++    assert(NODE_STATE(ksCurThread)->tcbAffinity == getCurrentCPUIndex()); \
++    tcbSchedEnqueue(NODE_STATE(ksCurThread));                             \
++} while (0)
++#define SCHED_APPEND_CURRENT_TCB do {                                     \
++    assert(NODE_STATE(ksCurThread)->tcbAffinity == getCurrentCPUIndex()); \
++    tcbSchedAppend(NODE_STATE(ksCurThread));                              \
++} while (0)
++
+ #else
+ #define SCHED_ENQUEUE(_t)           tcbSchedEnqueue(_t)
+ #define SCHED_APPEND(_t)            tcbSchedAppend(_t)
+-#endif /* ENABLE_SMP_SUPPORT */
+ 
+ #define SCHED_ENQUEUE_CURRENT_TCB   tcbSchedEnqueue(NODE_STATE(ksCurThread))
+ #define SCHED_APPEND_CURRENT_TCB    tcbSchedAppend(NODE_STATE(ksCurThread))
++#endif /* ENABLE_SMP_SUPPORT */
+ 
+ #ifdef CONFIG_KERNEL_MCS
+ /* Add TCB into the priority ordered endpoint queue */
+diff --git a/src/kernel/thread.c b/src/kernel/thread.c
+index 435f82309..5a2e048b3 100644
+--- a/src/kernel/thread.c
++++ b/src/kernel/thread.c
+@@ -378,7 +378,8 @@ void schedule(void)
+ 
+     if (NODE_STATE(ksSchedulerAction) != SchedulerAction_ResumeCurrentThread) {
+         bool_t was_runnable;
+-        if (isSchedulable(NODE_STATE(ksCurThread))) {
++        if (isSchedulable(NODE_STATE(ksCurThread))
++            SMP_COND_STATEMENT( && NODE_STATE(ksCurThread)->tcbAffinity == getCurrentCPUIndex())) {
+             was_runnable = true;
+             SCHED_ENQUEUE_CURRENT_TCB;
+         } else {
+@@ -396,7 +397,8 @@ void schedule(void)
+              * information flow in non-fastpath cases. */
+             bool_t fastfail =
+                 NODE_STATE(ksCurThread) == NODE_STATE(ksIdleThread)
+-                || (candidate->tcbPriority < NODE_STATE(ksCurThread)->tcbPriority);
++                || (candidate->tcbPriority < NODE_STATE(ksCurThread)->tcbPriority)
++                SMP_COND_STATEMENT( || NODE_STATE(ksCurThread)->tcbAffinity != getCurrentCPUIndex());
+             if (fastfail &&
+                 !isHighestPrio(ksCurDomain, candidate->tcbPriority)) {
+                 SCHED_ENQUEUE(candidate);
+diff --git a/src/object/endpoint.c b/src/object/endpoint.c
+index 822d71203..3dd226277 100644
+--- a/src/object/endpoint.c
++++ b/src/object/endpoint.c
+@@ -249,6 +249,11 @@ void receiveIPC(tcb_t *thread, cap_t cap, bool_t isBlocking)
+                     bool_t canDonate = sender->tcbSchedContext != NULL
+                                        && seL4_Fault_get_seL4_FaultType(sender->tcbFault) != seL4_Fault_Timeout;
+                     reply_push(sender, thread, replyPtr, canDonate);
++#ifdef ENABLE_SMP_SUPPORT
++                    if (isSchedulable(thread) && thread->tcbAffinity != getCurrentCPUIndex()) {
++                        possibleSwitchTo(thread);
++                    }
++#endif
+                 } else {
+                     setThreadState(sender, ThreadState_Inactive);
+                 }
+-- 
+2.43.0
+

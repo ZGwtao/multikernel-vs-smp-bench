@@ -17,6 +17,7 @@ MICROKIT_UNICORE     		:= $(CURDIR)/microkit-unicore
 RUST_SEL4 					:= $(CURDIR)/rust-seL4
 
 KERNEL_CAPDL_MULTIKERNEL 	:= $(CURDIR)/seL4-capdl-multikernel
+KERNEL_MAINLINE 			:= $(CURDIR)/seL4-mainline
 
 # ============================================================
 # Top-level targets
@@ -117,6 +118,7 @@ setup-submodules:
 	cd $(MICROKIT_SMP)        	&& git am $(PATCHES)/smp/*
 	cd $(MICROKIT_UNICORE)    	&& git am $(PATCHES)/unicore/*
 #	cd $(MICROKIT_CAPDL_MULTIKERNEL) && git am $(PATCHES)/capdl-multikernel/*
+	cd $(KERNEL_MAINLINE)        && git am $(PATCHES)/kernel/mainline/*
 	$(MAKE) link
 
 # ============================================================
