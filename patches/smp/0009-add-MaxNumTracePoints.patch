@@ -1,0 +1,25 @@
+From 8a29d2edfa662c0583f5d997c4eb9729720addf2 Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Thu, 7 May 2026 13:02:38 +1000
+Subject: [PATCH 9/9] add MaxNumTracePoints
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ build_sdk.py | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/build_sdk.py b/build_sdk.py
+index dc496ee..289ab44 100644
+--- a/build_sdk.py
++++ b/build_sdk.py
+@@ -444,6 +444,7 @@ SUPPORTED_CONFIGS = (
+             "KernelDebugBuild": False,
+             "KernelVerificationBuild": False,
+             "KernelBenchmarks": "tracepoints",
++            "KernelMaxNumTracePoints": 20,
+             "KernelSignalFastpath": True,
+             "HardwareDebugAPI": False,
+             "KernelMaxNumNodes": 4,
+-- 
+2.43.0
+
