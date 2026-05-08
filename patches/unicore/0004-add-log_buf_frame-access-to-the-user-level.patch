@@ -1,0 +1,69 @@
+From 7929cbda11e15d3c22f8ce732c63b74d58d56674 Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Thu, 7 May 2026 22:55:45 +1000
+Subject: [PATCH 4/5] add log_buf_frame access to the user-level
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ tool/microkit/src/capdl/builder.rs | 31 ++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
+
+diff --git a/tool/microkit/src/capdl/builder.rs b/tool/microkit/src/capdl/builder.rs
+index 65c7493..e0a0f72 100644
+--- a/tool/microkit/src/capdl/builder.rs
++++ b/tool/microkit/src/capdl/builder.rs
+@@ -88,6 +88,8 @@ const PD_MONITOR_EP_CAP_IDX: u64 = 5;
+ const PD_TCB_CAP_IDX: u64 = 6;
+ const PD_ARM_SMC_CAP_IDX: u64 = 7;
+ 
++const PD_LOG_BUF_CAP_IDX: u64 = 8;
++
+ const PD_BASE_OUTPUT_NOTIFICATION_CAP: u64 = 10;
+ const PD_BASE_OUTPUT_ENDPOINT_CAP: u64 = PD_BASE_OUTPUT_NOTIFICATION_CAP + 64;
+ const PD_BASE_IRQ_CAP: u64 = PD_BASE_OUTPUT_ENDPOINT_CAP + 64;
+@@ -674,6 +676,28 @@ pub fn build_capdl_spec(
+             cur_stack_vaddr += PageSize::Small as u64;
+         }
+ 
++        let log_buf_frame_obj_id = capdl_util_make_frame_obj(
++            &mut spec_container,
++            Fill {
++                entries: [].to_vec(),
++            },
++            &format!("{}_log_buf", pd.name),
++            None,
++            PageSize::Large.fixed_size_bits(kernel_config) as u8,
++        );
++        let log_buf_frame_cap =
++            capdl_util_make_frame_cap(log_buf_frame_obj_id, true, true, false, true);
++        map_page(
++            &mut spec_container,
++            kernel_config,
++            &pd.name,
++            pd_vspace_obj_id,
++            log_buf_frame_cap.clone(),
++            PageSize::Large as u64,
++            0xffc0_0000,
++        )
++        .unwrap();
++
+         // Step 3-4 Create Scheduling Context
+         let pd_sc_obj_id = capdl_util_make_sc_obj(
+             &mut spec_container,
+@@ -998,6 +1022,13 @@ pub fn build_capdl_spec(
+         ));
+         pd_id_to_cspace_id.insert(pd_global_idx, pd_cnode_obj_id);
+ 
++        capdl_util_insert_cap_into_cspace(
++            &mut spec_container,
++            pd_cnode_obj_id,
++            (PD_LOG_BUF_CAP_IDX) as u32,
++            log_buf_frame_cap,
++        );
++
+         // Step 3-14 Set the TCB parameters and all the various caps that we need to bind to this TCB.
+         if let Object::Tcb(pd_tcb) = &mut spec_container
+             .get_root_object_mut(pd_tcb_obj_id)
+-- 
+2.43.0
+

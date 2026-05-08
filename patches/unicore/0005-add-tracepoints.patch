@@ -1,0 +1,27 @@
+From d8c21a6274922a1e99145251f3e8f902917cb376 Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Sat, 9 May 2026 00:07:46 +1000
+Subject: [PATCH 5/5] add tracepoints
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ build_sdk.py | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/build_sdk.py b/build_sdk.py
+index 92532d9..1d1cb39 100644
+--- a/build_sdk.py
++++ b/build_sdk.py
+@@ -463,7 +463,8 @@ SUPPORTED_CONFIGS = (
+         kernel_options={
+             "KernelDebugBuild": False,
+             "KernelVerificationBuild": False,
+-            "KernelBenchmarks": "generic",
++            "KernelBenchmarks": "tracepoints",
++            "KernelMaxNumTracePoints": 200,
+             "KernelSignalFastpath": True,
+             "HardwareDebugAPI": False
+         },
+-- 
+2.43.0
+

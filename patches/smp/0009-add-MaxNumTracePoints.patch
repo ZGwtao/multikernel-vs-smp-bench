@@ -16,7 +16,7 @@ index dc496ee..289ab44 100644
              "KernelDebugBuild": False,
              "KernelVerificationBuild": False,
              "KernelBenchmarks": "tracepoints",
-+            "KernelMaxNumTracePoints": 20,
++            "KernelMaxNumTracePoints": 200,
              "KernelSignalFastpath": True,
              "HardwareDebugAPI": False,
              "KernelMaxNumNodes": 4,
