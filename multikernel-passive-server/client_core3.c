@@ -11,24 +11,18 @@
 #include "benchmark.h"
 
 #define SERVER_CH 0
-#define REMOTE_CORE_1_CH 1
-#define REMOTE_CORE_2_CH 2
-#define REMOTE_CORE_3_CH 3
 
 uintptr_t data_region_vaddr;
 
 void init(void)
 {
-    microkit_dbg_puts("CLIENT_CORE0|INFO: init function running\n");
-
-    microkit_notify(REMOTE_CORE_1_CH);
-    microkit_notify(REMOTE_CORE_2_CH);
-    microkit_notify(REMOTE_CORE_3_CH);
+    microkit_dbg_puts("CLIENT_CORE3|INFO: init function running\n");
 }
 
 void notified(microkit_channel ch)
 {
-    microkit_dbg_puts("CLIENT_CORE0|INFO: received SGI from core 1\n");
+    microkit_dbg_puts("CLIENT_CORE3|INFO: received SGI from core 0\n");
+
     while (1) {
         (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(0, 0));
     }
