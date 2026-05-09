@@ -20,8 +20,12 @@ void init(void)
     print("interferring client\n");
     for (;;) {
         {
+#if 1
+            seL4_BenchmarkNullSyscall();
+#else
             /* Call high (does not switch threads) */
             seL4_Call(BASE_ENDPOINT_CAP + PPC_HI_LO_CHANNEL, microkit_msginfo_new(0, 0));
+#endif
         }
     }
 }
