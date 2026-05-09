@@ -1,0 +1,53 @@
+From 46c9017a520d750b032d4eb66fa44cd0311aa92f Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Sat, 9 May 2026 00:01:40 +1000
+Subject: [PATCH] tracepoints for what's in the lock
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ src/fastpath/fastpath.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/src/fastpath/fastpath.c b/src/fastpath/fastpath.c
+index 681d79cbc..fd91cec04 100644
+--- a/src/fastpath/fastpath.c
++++ b/src/fastpath/fastpath.c
+@@ -30,6 +30,8 @@ void NORETURN fastpath_call(word_t cptr, word_t msgInfo)
+     word_t fault_type;
+     dom_t dom;
+ 
++    TRACE_POINT_START(0);
++
+     /* Get message info, length, and fault type. */
+     info = messageInfoFromWord_raw(msgInfo);
+     length = seL4_MessageInfo_get_length(info);
+@@ -229,6 +231,8 @@ void NORETURN fastpath_call(word_t cptr, word_t msgInfo)
+ 
+     msgInfo = wordFromMessageInfo(seL4_MessageInfo_set_capsUnwrapped(info, 0));
+ 
++    TRACE_POINT_STOP(0);
++
+     fastpath_restore(badge, msgInfo, NODE_STATE(ksCurThread));
+ }
+ 
+@@ -256,6 +260,8 @@ void NORETURN fastpath_reply_recv(word_t cptr, word_t msgInfo)
+     pde_t stored_hw_asid;
+     dom_t dom;
+ 
++    TRACE_POINT_START(1);
++
+     /* Get message info and length */
+     info = messageInfoFromWord_raw(msgInfo);
+     length = seL4_MessageInfo_get_length(info);
+@@ -543,6 +549,8 @@ void NORETURN fastpath_reply_recv(word_t cptr, word_t msgInfo)
+ 
+         msgInfo = wordFromMessageInfo(seL4_MessageInfo_set_capsUnwrapped(info, 0));
+ 
++        TRACE_POINT_STOP(1);
++
+         fastpath_restore(badge, msgInfo, NODE_STATE(ksCurThread));
+ 
+ #ifdef CONFIG_EXCEPTION_FASTPATH
+-- 
+2.43.0
+

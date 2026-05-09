@@ -1,0 +1,441 @@
+From c49bdc046a90fa1dd4654f339f4ec5d2caea54b5 Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Sat, 9 May 2026 00:01:40 +1000
+Subject: [PATCH] tracepoints for breakdown analysis of Call+ReplyRecv
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ .../arch/arm/arch/64/mode/fastpath/fastpath.h |  15 ++
+ src/fastpath/fastpath.c                       | 167 ++++++++++++++----
+ 2 files changed, 151 insertions(+), 31 deletions(-)
+
+diff --git a/include/arch/arm/arch/64/mode/fastpath/fastpath.h b/include/arch/arm/arch/64/mode/fastpath/fastpath.h
+index 12d55f3c9..acec6368d 100644
+--- a/include/arch/arm/arch/64/mode/fastpath/fastpath.h
++++ b/include/arch/arm/arch/64/mode/fastpath/fastpath.h
+@@ -32,21 +32,36 @@ switchToThread_fp(tcb_t *thread, vspace_root_t *vroot, pde_t stored_hw_asid)
+ {
+     asid_t asid;
+ 
++    TRACE_POINT_START(16);
++
+     if (config_set(CONFIG_ARM_HYPERVISOR_SUPPORT)) {
+         vcpu_switch(thread->tcbArch.tcbVCPU);
+     }
++
++    TRACE_POINT_STOP(16);
++    TRACE_POINT_START(17);
++
+     asid = (asid_t)(stored_hw_asid.words[0] & 0xffff);
++
++    TRACE_POINT_STOP(17);
++    TRACE_POINT_START(18);
++
+     armv_contextSwitch_HWASID(vroot, asid);
+ 
+ #ifdef CONFIG_BENCHMARK_TRACK_UTILISATION
+     benchmark_utilisation_switch(NODE_STATE(ksCurThread), thread);
+ #endif
+ 
++    TRACE_POINT_STOP(18);
++    TRACE_POINT_START(19);
++
+ #ifdef CONFIG_HAVE_FPU
+     lazyFPURestore(thread);
+ #endif /* CONFIG_HAVE_FPU */
+ 
+     NODE_STATE(ksCurThread) = thread;
++
++    TRACE_POINT_STOP(19);
+ }
+ 
+ #ifdef CONFIG_EXCEPTION_FASTPATH
+diff --git a/src/fastpath/fastpath.c b/src/fastpath/fastpath.c
+index 681d79cbc..b20ec8061 100644
+--- a/src/fastpath/fastpath.c
++++ b/src/fastpath/fastpath.c
+@@ -12,6 +12,10 @@
+ #endif
+ #include <benchmark/benchmark_utilisation.h>
+ 
++
++#define TRACE_CALL (1)
++#define TRACE_REPLY_RECV (1)
++
+ #ifdef CONFIG_ARCH_ARM
+ static inline
+ FORCE_INLINE
+@@ -29,19 +33,27 @@ void NORETURN fastpath_call(word_t cptr, word_t msgInfo)
+     pde_t stored_hw_asid;
+     word_t fault_type;
+     dom_t dom;
+-
++#ifdef TRACE_CALL
++    TRACE_POINT_START(0);
++#endif
+     /* Get message info, length, and fault type. */
+     info = messageInfoFromWord_raw(msgInfo);
+     length = seL4_MessageInfo_get_length(info);
+     fault_type = seL4_Fault_get_seL4_FaultType(NODE_STATE(ksCurThread)->tcbFault);
+-
++#ifdef TRACE_CALL
++    TRACE_POINT_STOP(0);
++    TRACE_POINT_START(1);
++#endif
+     /* Check there's no extra caps, the length is ok and there's no
+      * saved fault. */
+     if (unlikely(fastpath_mi_check(msgInfo) ||
+                  fault_type != seL4_Fault_NullFault)) {
+         slowpath(SysCall);
+     }
+-
++#ifdef TRACE_CALL
++    TRACE_POINT_STOP(1);
++    TRACE_POINT_START(2);
++#endif
+     /* Lookup the cap */
+     ep_cap = lookup_fp(TCB_PTR_CTE_PTR(NODE_STATE(ksCurThread), tcbCTable)->cap, cptr);
+ 
+@@ -50,7 +62,10 @@ void NORETURN fastpath_call(word_t cptr, word_t msgInfo)
+                  !cap_endpoint_cap_get_capCanSend(ep_cap))) {
+         slowpath(SysCall);
+     }
+-
++#ifdef TRACE_CALL
++    TRACE_POINT_STOP(2);
++    TRACE_POINT_START(3);
++#endif
+     /* Get the endpoint address */
+     ep_ptr = EP_PTR(cap_endpoint_cap_get_capEPPtr(ep_cap));
+ 
+@@ -62,14 +77,20 @@ void NORETURN fastpath_call(word_t cptr, word_t msgInfo)
+     if (unlikely(endpoint_ptr_get_state(ep_ptr) != EPState_Recv)) {
+         slowpath(SysCall);
+     }
+-
++#ifdef TRACE_CALL
++    TRACE_POINT_STOP(3);
++    TRACE_POINT_START(4);
++#endif
+     /* ensure we are not single stepping the destination in ia32 */
+ #if defined(CONFIG_HARDWARE_DEBUG_API) && defined(CONFIG_ARCH_IA32)
+     if (unlikely(dest->tcbArch.tcbContext.breakpointState.single_step_enabled)) {
+         slowpath(SysCall);
+     }
+ #endif
+-
++#ifdef TRACE_CALL
++    TRACE_POINT_STOP(4);
++    TRACE_POINT_START(5);
++#endif
+     /* Get destination thread.*/
+     newVTable = TCB_PTR_CTE_PTR(dest, tcbVTable)->cap;
+ 
+@@ -80,7 +101,10 @@ void NORETURN fastpath_call(word_t cptr, word_t msgInfo)
+     if (unlikely(! isValidVTableRoot_fp(newVTable))) {
+         slowpath(SysCall);
+     }
+-
++#ifdef TRACE_CALL
++    TRACE_POINT_STOP(5);
++    TRACE_POINT_START(6);
++#endif
+ #ifdef CONFIG_ARCH_AARCH32
+     /* Get HW ASID */
+     stored_hw_asid = cap_pd[PD_ASID_SLOT];
+@@ -119,7 +143,10 @@ void NORETURN fastpath_call(word_t cptr, word_t msgInfo)
+     /* Get HW ASID */
+     stored_hw_asid.words[0] = cap_page_table_cap_get_capPTMappedASID(newVTable);
+ #endif
+-
++#ifdef TRACE_CALL
++    TRACE_POINT_STOP(6);
++    TRACE_POINT_START(7);
++#endif
+     /* let gcc optimise this out for 1 domain */
+     dom = maxDom ? ksCurDomain : 0;
+     /* ensure only the idle thread or lower prio threads are present in the scheduler */
+@@ -127,7 +154,10 @@ void NORETURN fastpath_call(word_t cptr, word_t msgInfo)
+                  !isHighestPrio(dom, dest->tcbPriority))) {
+         slowpath(SysCall);
+     }
+-
++#ifdef TRACE_CALL
++    TRACE_POINT_STOP(7);
++    TRACE_POINT_START(8);
++#endif
+     /* Ensure that the endpoint has has grant or grant-reply rights so that we can
+      * create the reply cap */
+     if (unlikely(!cap_endpoint_cap_get_capCanGrant(ep_cap) &&
+@@ -140,7 +170,10 @@ void NORETURN fastpath_call(word_t cptr, word_t msgInfo)
+         slowpath(SysCall);
+     }
+ #endif
+-
++#ifdef TRACE_CALL
++    TRACE_POINT_STOP(8);
++    TRACE_POINT_START(9);
++#endif
+     /* Ensure the original caller is in the current domain and can be scheduled directly. */
+     if (unlikely(dest->tcbDomain != ksCurDomain && 0 < maxDom)) {
+         slowpath(SysCall);
+@@ -156,7 +189,10 @@ void NORETURN fastpath_call(word_t cptr, word_t msgInfo)
+         slowpath(SysCall);
+     }
+ #endif
+-
++#ifdef TRACE_CALL
++    TRACE_POINT_STOP(9);
++    TRACE_POINT_START(10);
++#endif
+ #ifdef ENABLE_SMP_SUPPORT
+     /* Ensure both threads have the same affinity */
+     if (unlikely(NODE_STATE(ksCurThread)->tcbAffinity != dest->tcbAffinity)) {
+@@ -173,7 +209,10 @@ void NORETURN fastpath_call(word_t cptr, word_t msgInfo)
+ #ifdef CONFIG_BENCHMARK_TRACK_KERNEL_ENTRIES
+     ksKernelEntry.is_fastpath = true;
+ #endif
+-
++#ifdef TRACE_CALL
++    TRACE_POINT_STOP(10);
++    TRACE_POINT_START(11);
++#endif
+     /* Dequeue the destination. */
+     endpoint_ptr_set_epQueue_head_np(ep_ptr, TCB_REF(dest->tcbEPNext));
+     if (unlikely(dest->tcbEPNext)) {
+@@ -183,10 +222,17 @@ void NORETURN fastpath_call(word_t cptr, word_t msgInfo)
+     }
+ 
+     badge = cap_endpoint_cap_get_capEPBadge(ep_cap);
+-
++#ifdef TRACE_CALL
++    TRACE_POINT_STOP(11);
++    TRACE_POINT_START(12);
++#endif
+     /* Unlink dest <-> reply, link src (cur thread) <-> reply */
+     thread_state_ptr_set_tsType_np(&NODE_STATE(ksCurThread)->tcbState,
+                                    ThreadState_BlockedOnReply);
++#ifdef TRACE_CALL
++    TRACE_POINT_STOP(12);
++    TRACE_POINT_START(13);
++#endif
+ #ifdef CONFIG_KERNEL_MCS
+     thread_state_ptr_set_replyObject_np(&dest->tcbState, 0);
+     thread_state_ptr_set_replyObject_np(&NODE_STATE(ksCurThread)->tcbState, REPLY_REF(reply));
+@@ -219,12 +265,21 @@ void NORETURN fastpath_call(word_t cptr, word_t msgInfo)
+     mdb_node_ptr_mset_mdbNext_mdbRevocable_mdbFirstBadged(
+         &replySlot->cteMDBNode, CTE_REF(callerSlot), 1, 1);
+ #endif
+-
++#ifdef TRACE_CALL
++    TRACE_POINT_STOP(13);
++    TRACE_POINT_START(14);
++#endif
+     fastpath_copy_mrs(length, NODE_STATE(ksCurThread), dest);
+-
++#ifdef TRACE_CALL
++    TRACE_POINT_STOP(14);
++    TRACE_POINT_START(15);
++#endif
+     /* Dest thread is set Running, but not queued. */
+     thread_state_ptr_set_tsType_np(&dest->tcbState,
+                                    ThreadState_Running);
++#ifdef TRACE_CALL
++    TRACE_POINT_STOP(15);
++#endif
+     switchToThread_fp(dest, cap_pd, stored_hw_asid);
+ 
+     msgInfo = wordFromMessageInfo(seL4_MessageInfo_set_capsUnwrapped(info, 0));
+@@ -255,7 +310,9 @@ void NORETURN fastpath_reply_recv(word_t cptr, word_t msgInfo)
+     vspace_root_t *cap_pd;
+     pde_t stored_hw_asid;
+     dom_t dom;
+-
++#ifdef TRACE_REPLY_RECV
++    TRACE_POINT_START(20);
++#endif
+     /* Get message info and length */
+     info = messageInfoFromWord_raw(msgInfo);
+     length = seL4_MessageInfo_get_length(info);
+@@ -267,7 +324,10 @@ void NORETURN fastpath_reply_recv(word_t cptr, word_t msgInfo)
+                  fault_type != seL4_Fault_NullFault)) {
+         slowpath(SysReplyRecv);
+     }
+-
++#ifdef TRACE_REPLY_RECV
++    TRACE_POINT_STOP(20);
++    TRACE_POINT_START(21);
++#endif
+     /* Lookup the cap */
+     ep_cap = lookup_fp(TCB_PTR_CTE_PTR(NODE_STATE(ksCurThread), tcbCTable)->cap,
+                        cptr);
+@@ -277,7 +337,10 @@ void NORETURN fastpath_reply_recv(word_t cptr, word_t msgInfo)
+                  !cap_endpoint_cap_get_capCanReceive(ep_cap))) {
+         slowpath(SysReplyRecv);
+     }
+-
++#ifdef TRACE_REPLY_RECV
++    TRACE_POINT_STOP(21);
++    TRACE_POINT_START(22);
++#endif
+ #ifdef CONFIG_KERNEL_MCS
+     /* lookup the reply object */
+     cap_t reply_cap = lookup_fp(TCB_PTR_CTE_PTR(NODE_STATE(ksCurThread), tcbCTable)->cap, reply);
+@@ -287,7 +350,10 @@ void NORETURN fastpath_reply_recv(word_t cptr, word_t msgInfo)
+         slowpath(SysReplyRecv);
+     }
+ #endif
+-
++#ifdef TRACE_REPLY_RECV
++    TRACE_POINT_STOP(22);
++    TRACE_POINT_START(23);
++#endif
+     /* Check there is nothing waiting on the notification */
+     if (unlikely(NODE_STATE(ksCurThread)->tcbBoundNotification &&
+                  notification_ptr_get_state(NODE_STATE(ksCurThread)->tcbBoundNotification) == NtfnState_Active)) {
+@@ -301,7 +367,10 @@ void NORETURN fastpath_reply_recv(word_t cptr, word_t msgInfo)
+     if (unlikely(endpoint_ptr_get_state(ep_ptr) == EPState_Send)) {
+         slowpath(SysReplyRecv);
+     }
+-
++#ifdef TRACE_REPLY_RECV
++    TRACE_POINT_STOP(23);
++    TRACE_POINT_START(24);
++#endif
+ #ifdef CONFIG_KERNEL_MCS
+     /* Get the reply address */
+     reply_t *reply_ptr = REPLY_PTR(cap_reply_cap_get_capReplyPtr(reply_cap));
+@@ -326,7 +395,10 @@ void NORETURN fastpath_reply_recv(word_t cptr, word_t msgInfo)
+     /* Determine who the caller is. */
+     caller = TCB_PTR(cap_reply_cap_get_capTCBPtr(callerCap));
+ #endif
+-
++#ifdef TRACE_REPLY_RECV
++    TRACE_POINT_STOP(24);
++    TRACE_POINT_START(25);
++#endif
+     /* ensure we are not single stepping the caller in ia32 */
+ #if defined(CONFIG_HARDWARE_DEBUG_API) && defined(CONFIG_ARCH_IA32)
+     if (unlikely(caller->tcbArch.tcbContext.breakpointState.single_step_enabled)) {
+@@ -348,7 +420,10 @@ void NORETURN fastpath_reply_recv(word_t cptr, word_t msgInfo)
+         slowpath(SysReplyRecv);
+     }
+ #endif
+-
++#ifdef TRACE_REPLY_RECV
++    TRACE_POINT_STOP(25);
++    TRACE_POINT_START(26);
++#endif
+     /* Get destination thread.*/
+     newVTable = TCB_PTR_CTE_PTR(caller, tcbVTable)->cap;
+ 
+@@ -359,7 +434,10 @@ void NORETURN fastpath_reply_recv(word_t cptr, word_t msgInfo)
+     if (unlikely(! isValidVTableRoot_fp(newVTable))) {
+         slowpath(SysReplyRecv);
+     }
+-
++#ifdef TRACE_REPLY_RECV
++    TRACE_POINT_STOP(26);
++    TRACE_POINT_START(27);
++#endif
+ #ifdef CONFIG_ARCH_AARCH32
+     /* Get HWASID. */
+     stored_hw_asid = cap_pd[PD_ASID_SLOT];
+@@ -396,7 +474,10 @@ void NORETURN fastpath_reply_recv(word_t cptr, word_t msgInfo)
+ #ifdef CONFIG_ARCH_RISCV
+     stored_hw_asid.words[0] = cap_page_table_cap_get_capPTMappedASID(newVTable);
+ #endif
+-
++#ifdef TRACE_REPLY_RECV
++    TRACE_POINT_STOP(27);
++    TRACE_POINT_START(28);
++#endif
+     /* Ensure the original caller can be scheduled directly. */
+     dom = maxDom ? ksCurDomain : 0;
+     if (unlikely(!isHighestPrio(dom, caller->tcbPriority))) {
+@@ -420,7 +501,10 @@ void NORETURN fastpath_reply_recv(word_t cptr, word_t msgInfo)
+         slowpath(SysReplyRecv);
+     }
+ #endif
+-
++#ifdef TRACE_REPLY_RECV
++    TRACE_POINT_STOP(28);
++    TRACE_POINT_START(29);
++#endif
+ #ifdef ENABLE_SMP_SUPPORT
+     /* Ensure both threads have the same affinity */
+     if (unlikely(NODE_STATE(ksCurThread)->tcbAffinity != caller->tcbAffinity)) {
+@@ -437,7 +521,10 @@ void NORETURN fastpath_reply_recv(word_t cptr, word_t msgInfo)
+ #ifdef CONFIG_BENCHMARK_TRACK_KERNEL_ENTRIES
+     ksKernelEntry.is_fastpath = true;
+ #endif
+-
++#ifdef TRACE_REPLY_RECV
++    TRACE_POINT_STOP(29);
++    TRACE_POINT_START(30);
++#endif
+     /* Set thread state to BlockedOnReceive */
+     thread_state_ptr_mset_blockingObject_tsType(
+         &NODE_STATE(ksCurThread)->tcbState, (word_t)ep_ptr, ThreadState_BlockedOnReceive);
+@@ -451,7 +538,10 @@ void NORETURN fastpath_reply_recv(word_t cptr, word_t msgInfo)
+     thread_state_ptr_set_blockingIPCCanGrant(&NODE_STATE(ksCurThread)->tcbState,
+                                              cap_endpoint_cap_get_capCanGrant(ep_cap));;
+ #endif
+-
++#ifdef TRACE_REPLY_RECV
++    TRACE_POINT_STOP(30);
++    TRACE_POINT_START(31);
++#endif
+     /* Place the thread in the endpoint queue */
+     endpointTail = endpoint_ptr_get_epQueue_tail_fp(ep_ptr);
+     if (likely(!endpointTail)) {
+@@ -479,7 +569,10 @@ void NORETURN fastpath_reply_recv(word_t cptr, word_t msgInfo)
+                                              EPState_Recv);
+ #endif
+     }
+-
++#ifdef TRACE_REPLY_RECV
++    TRACE_POINT_STOP(31);
++    TRACE_POINT_START(32);
++#endif
+ #ifdef CONFIG_KERNEL_MCS
+     /* update call stack */
+     word_t prev_ptr = call_stack_get_callStackPtr(reply_ptr->replyPrev);
+@@ -504,7 +597,10 @@ void NORETURN fastpath_reply_recv(word_t cptr, word_t msgInfo)
+     callerSlot->cap = cap_null_cap_new();
+     callerSlot->cteMDBNode = nullMDBNode;
+ #endif
+-
++#ifdef TRACE_REPLY_RECV
++    TRACE_POINT_STOP(32);
++    TRACE_POINT_START(33);
++#endif
+ #ifdef CONFIG_EXCEPTION_FASTPATH
+     if (unlikely(fault_type != seL4_Fault_NullFault)) {
+         /* Note - this works as is for VM faults but will need to be changed when other faults are added. VM faults always
+@@ -534,11 +630,20 @@ void NORETURN fastpath_reply_recv(word_t cptr, word_t msgInfo)
+ 
+         /* Replies don't have a badge. */
+         badge = 0;
+-
++#ifdef TRACE_REPLY_RECV
++        TRACE_POINT_STOP(33);
++        TRACE_POINT_START(34);
++#endif
+         fastpath_copy_mrs(length, NODE_STATE(ksCurThread), caller);
+-
++#ifdef TRACE_REPLY_RECV
++        TRACE_POINT_STOP(34);
++        TRACE_POINT_START(35);
++#endif
+         /* Dest thread is set Running, but not queued. */
+         thread_state_ptr_set_tsType_np(&caller->tcbState, ThreadState_Running);
++#ifdef TRACE_REPLY_RECV
++        TRACE_POINT_STOP(35);
++#endif
+         switchToThread_fp(caller, cap_pd, stored_hw_asid);
+ 
+         msgInfo = wordFromMessageInfo(seL4_MessageInfo_set_capsUnwrapped(info, 0));
+-- 
+2.43.0
+

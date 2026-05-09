@@ -1,0 +1,61 @@
+From 1a17798a8c2c79cc8e201b3e3b6ae8ec16fe740c Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Fri, 8 May 2026 13:37:36 +1000
+Subject: [PATCH] tracepoints for locks
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ include/arch/arm/arch/64/mode/fastpath/fastpath.h | 4 ++++
+ src/arch/arm/c_traps.c                            | 8 ++++++++
+ 2 files changed, 12 insertions(+)
+
+diff --git a/include/arch/arm/arch/64/mode/fastpath/fastpath.h b/include/arch/arm/arch/64/mode/fastpath/fastpath.h
+index 12d55f3c9..caa213a78 100644
+--- a/include/arch/arm/arch/64/mode/fastpath/fastpath.h
++++ b/include/arch/arm/arch/64/mode/fastpath/fastpath.h
+@@ -145,8 +145,12 @@ static inline void NORETURN FORCE_INLINE fastpath_restore(word_t badge, word_t m
+     restore_user_debug_context(cur_thread);
+ #endif
+ 
++    TRACE_POINT_START(1);
++
+     NODE_UNLOCK;
+ 
++    TRACE_POINT_STOP(1);
++
+     register word_t badge_reg asm("x0") = badge;
+     register word_t msgInfo_reg asm("x1") = msgInfo;
+     register word_t cur_thread_reg asm("x2") = (word_t)cur_thread->tcbArch.tcbContext.registers;
+diff --git a/src/arch/arm/c_traps.c b/src/arch/arm/c_traps.c
+index 8104d73df..9e6e68456 100644
+--- a/src/arch/arm/c_traps.c
++++ b/src/arch/arm/c_traps.c
+@@ -139,8 +139,12 @@ void VISIBLE c_handle_syscall(word_t cptr, word_t msgInfo, syscall_t syscall)
+ ALIGN(L1_CACHE_LINE_SIZE)
+ void VISIBLE c_handle_fastpath_call(word_t cptr, word_t msgInfo)
+ {
++    TRACE_POINT_START(2);
++
+     NODE_LOCK_SYS;
+ 
++    TRACE_POINT_STOP(2);
++
+     c_entry_hook();
+ #ifdef TRACK_KERNEL_ENTRIES
+     benchmark_debug_syscall_start(cptr, msgInfo, SysCall);
+@@ -176,8 +180,12 @@ void VISIBLE c_handle_fastpath_reply_recv(word_t cptr, word_t msgInfo, word_t re
+ void VISIBLE c_handle_fastpath_reply_recv(word_t cptr, word_t msgInfo)
+ #endif
+ {
++    TRACE_POINT_START(0);
++
+     NODE_LOCK_SYS;
+ 
++    TRACE_POINT_STOP(0);
++
+     c_entry_hook();
+ #ifdef TRACK_KERNEL_ENTRIES
+     benchmark_debug_syscall_start(cptr, msgInfo, SysReplyRecv);
+-- 
+2.43.0
+
