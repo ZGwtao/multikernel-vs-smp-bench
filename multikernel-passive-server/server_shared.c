@@ -193,6 +193,7 @@ microkit_msginfo protected(microkit_channel ch, microkit_msginfo msginfo)
             cycles_t now = pmu_read_cycles();
             cycles_t start = *time_stamp_addr;
             cycles_t elapsed = now - start;
+            puts("\n");
             print("cycles per increment: ");
             puthex64(elapsed / (*shared_data));
             puts("\n");
