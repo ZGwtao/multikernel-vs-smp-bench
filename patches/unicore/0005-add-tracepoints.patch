@@ -18,7 +18,7 @@ index 92532d9..1d1cb39 100644
              "KernelVerificationBuild": False,
 -            "KernelBenchmarks": "generic",
 +            "KernelBenchmarks": "tracepoints",
-+            "KernelMaxNumTracePoints": 200,
++            "KernelMaxNumTracePoints": 6000,
              "KernelSignalFastpath": True,
              "HardwareDebugAPI": False
          },
