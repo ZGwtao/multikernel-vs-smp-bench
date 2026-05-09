@@ -3,15 +3,30 @@
  *
  * SPDX-License-Identifier: BSD-2-Clause
  */
-
-#include <microkit.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <microkit.h>
+#include <assert.h>
+
+#include "benchmark.h"
 
 #define CORE_0_CH 5
 #define CORE_1_CH 6
 
 uintptr_t shared_region_vaddr;
+uintptr_t data_region_vaddr;
+
+#define SHARED_TIME_STAMP_OFFSET 8UL
+
+static inline seL4_Word *shared_data_region_addr(void)
+{
+    return (seL4_Word *)data_region_vaddr;
+}
+
+static inline seL4_Word *shared_time_stamp_addr(void)
+{
+    return (seL4_Word *)(shared_region_vaddr + SHARED_TIME_STAMP_OFFSET);
+}
 
 /*
  * Use the first 8 bytes of the shared region as the lock word.
@@ -145,22 +160,46 @@ microkit_msginfo protected(microkit_channel ch, microkit_msginfo msginfo)
 {
     // if you comment out the shared lock calls, you will likely see interleaved prints from both cores
     shared_lock_acquire();
-
-    switch (microkit_msginfo_get_label(msginfo)) {
-    case 1:
-        microkit_dbg_puts("SERVER_SHARED: received a ppc call from channel ");
-        if (ch == CORE_0_CH) {
-            microkit_dbg_puts("0\n");
-        } else if (ch == CORE_1_CH) {
-            microkit_dbg_puts("1\n");
-        } else {
-            microkit_dbg_puts("unknown\n");
+#if 0
+        switch (microkit_msginfo_get_label(msginfo)) {
+        case 1:
+            microkit_dbg_puts("SERVER_SHARED: received a ppc call from channel ");
+            if (ch == CORE_0_CH) {
+                microkit_dbg_puts("0\n");
+            } else if (ch == CORE_1_CH) {
+                microkit_dbg_puts("1\n");
+            } else {
+                microkit_dbg_puts("unknown\n");
+            }
+            break;
+        default:
+            microkit_dbg_puts("SERVER_SHARED|ERROR: received an unexpected message\n");
         }
-        break;
-    default:
-        microkit_dbg_puts("SERVER_SHARED|ERROR: received an unexpected message\n");
-    }
+#else
+    {
+        seL4_Word *shared_data = shared_data_region_addr();
+        if ((*shared_data > 1000000)) {
+            for (;;) {}
+        }
+        
+        seL4_Word *time_stamp_addr = shared_time_stamp_addr();
+        if ((*time_stamp_addr == 0)) {
+            *time_stamp_addr = (seL4_Word)pmu_read_cycles();
+        }
 
+        (*shared_data)++;
+
+        if ((*shared_data > 1000000)) {
+            cycles_t now = pmu_read_cycles();
+            cycles_t start = *time_stamp_addr;
+            cycles_t elapsed = now - start;
+            print("cycles per increment: ");
+            puthex64(elapsed / (*shared_data));
+            puts("\n");
+            for (;;) {}
+        }
+    }
+#endif
     shared_lock_release();
 
     return seL4_MessageInfo_new(0, 0, 0, 0);
@@ -173,6 +212,7 @@ void init(void)
      * lock before anyone else can use it.
      */
     shared_lock_init();
+    pmu_enable();
     microkit_dbg_puts("SERVER_SHARED|INFO: init function running\n");
 }
 

@@ -45,9 +45,9 @@ endif
 
 MICROKIT_TOOL ?= $(MICROKIT_SDK)/bin/microkit
 
-SERVER_SHARED_OBJS := server_shared.o
-CLIENT_CORE0_OBJS := client_core0.o
-CLIENT_CORE1_OBJS := client_core1.o
+SERVER_SHARED_OBJS := server_shared.o print.o
+CLIENT_CORE0_OBJS := client_core0.o print.o
+CLIENT_CORE1_OBJS := client_core1.o print.o
 
 IMAGES := client_core0.elf client_core1.elf server_shared.elf
 CFLAGS := -nostdlib -ffreestanding -g -O3 -Wall  -Wno-unused-function -Werror -I$(BOARD_DIR)/include $(CFLAGS_ARCH)
