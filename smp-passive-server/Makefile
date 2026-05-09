@@ -47,7 +47,7 @@ MICROKIT_TOOL ?= $(MICROKIT_SDK)/bin/microkit
 
 # SERVER_CORE0_OBJS := server_core0.o
 # SERVER_CORE1_OBJS := server_core1.o
-SERVER_SHARED_OBJS := server_shared.o
+SERVER_SHARED_OBJS := server_shared.o print.o
 CLIENT_CORE0_OBJS := client_core0.o
 CLIENT_CORE1_OBJS := client_core1.o
 

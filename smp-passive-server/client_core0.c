@@ -6,6 +6,8 @@
 
 #include <microkit.h>
 
+#include "benchmark.h"
+
 #define SERVER_CH 10
 #define REMOTE_CH 2
 
@@ -17,6 +19,8 @@ void init(void)
     microkit_dbg_puts("CLIENT_CORE0|INFO: init function running\n");
     microkit_dbg_puts("CLIENT_CORE0|INFO: done initial call to server, now notifying core 1\n");
 
+    pmu_enable();
+
     microkit_notify(REMOTE_CH);
 }
 
@@ -26,10 +30,12 @@ void notified(microkit_channel ch)
     microkit_dbg_puts("client 0 - call server on 0\n");
 #if 1
     for (;;) {
+#if 0
         for (int i = 0; i < 1000; i++) {
             /* busy wait to increase the chance of preemption */
             asm volatile("nop");
         }
+#endif
         (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(0, 0));
     }
 #else

@@ -8,6 +8,9 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <assert.h>
+
+#include "benchmark.h"
 
 #define CORE_0_CH 5
 #define CORE_1_CH 6
@@ -18,26 +21,39 @@
 #define INPUT_CAP 1
 #define REPLY_CAP 4
 
+cycles_t start;
+seL4_Word num;
+
 microkit_msginfo protected(microkit_channel ch, microkit_msginfo msginfo)
 {
-    seL4_Word badge = ch;
-    seL4_MessageInfo_t tag UNUSED;
-    seL4_MessageInfo_t reply_tag = microkit_msginfo_new(0, 0);
-    /* To make this simpler this literally just always replies */
-    while (true) {
-        microkit_dbg_puts("SHARED_SERVER=>RECV_FROM_");
-        microkit_dbg_put32(badge & 0x3f);
-        microkit_dbg_puts("\n");
-        /* the reason we put the INPUT_CAP here is the call comes from it */
-        tag = seL4_ReplyRecv(INPUT_CAP, reply_tag, &badge, REPLY_CAP);
-    }
+    {
+        if ((num > 1000000)) {
+            for (;;) {}
+        }
+        if ((start == 0)) {
+            start = (seL4_Word)pmu_read_cycles();
+        }
 
+        num++;
+
+        if ((num > 1000000)) {
+            cycles_t now = pmu_read_cycles();
+            cycles_t elapsed = now - start;
+            print("cycles per increment: ");
+            puthex64(elapsed / num);
+            puts("\n");
+            for (;;) {}
+        }
+    }
     return seL4_MessageInfo_new(0, 0, 0, 0);
 }
 
 void init(void)
 {
     microkit_dbg_puts("SERVER_SHARED|INFO: init function running\n");
+
+    start = 0;
+    num = 0;
 }
 
 void notified(microkit_channel ch) {}
