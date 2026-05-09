@@ -12,15 +12,6 @@
 
 #include "benchmark.h"
 
-#define CORE_0_CH 5
-#define CORE_1_CH 6
-
-#define UNUSED __attribute__((unused))
-
-/* Because we deliberately subvert libmicrokit in these examples */
-#define INPUT_CAP 1
-#define REPLY_CAP 4
-
 cycles_t start;
 seL4_Word num;
 

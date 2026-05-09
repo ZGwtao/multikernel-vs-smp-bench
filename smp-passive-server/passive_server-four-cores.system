@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright 2022, UNSW
+
+ SPDX-License-Identifier: BSD-2-Clause
+-->
+<system>
+    <memory_region name="uart" size="0x1000" phys_addr="0xff803000" />
+
+    <protection_domain name="server_shared" priority="100" passive="true" cpu="0">
+        <program_image path="server_shared.elf" />
+        <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
+    </protection_domain>
+
+    <protection_domain name="client_core0" priority="99" cpu="0">
+        <program_image path="client_core0.elf" />
+    </protection_domain>
+
+    <protection_domain name="client_core1" priority="99" cpu="1">
+        <program_image path="client_core1.elf" />
+    </protection_domain>
+
+    <protection_domain name="client_core2" priority="99" cpu="2">
+        <program_image path="client_core2.elf" />
+    </protection_domain>
+
+    <protection_domain name="client_core3" priority="99" cpu="3">
+        <program_image path="client_core3.elf" />
+    </protection_domain>
+
+    <channel>
+        <end pd="server_shared" id="5" />
+        <end pd="client_core0" id="10" pp="true" />
+    </channel>
+
+    <channel>
+        <end pd="server_shared" id="6" />
+        <end pd="client_core1" id="10" pp="true" />
+    </channel>
+
+    <channel>
+        <end pd="server_shared" id="7" />
+        <end pd="client_core2" id="10" pp="true" />
+    </channel>
+
+    <channel>
+        <end pd="server_shared" id="8" />
+        <end pd="client_core3" id="10" pp="true" />
+    </channel>
+
+    <channel>
+        <end pd="client_core0" id="2" />
+        <end pd="client_core1" id="2" />
+    </channel>
+
+    <channel>
+        <end pd="client_core0" id="3" />
+        <end pd="client_core2" id="2" />
+    </channel>
+
+    <channel>
+        <end pd="client_core0" id="4" />
+        <end pd="client_core3" id="2" />
+    </channel>
+
+</system>
