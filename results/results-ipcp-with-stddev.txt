@@ -1,0 +1,143 @@
+
+four core, two clients per core, multikernel
+
+server_core1: sum cycles recorded: 0x0000000026eb954d
+server_core1: average cycles recorded: 0x00000000000004af
+server_core1: local count: 0x0000000000084dcf
+server_core1: sum squared cycles recorded: 0x000000b728b998d5
+server_core1: min cycles recorded: 0x0000000000000418
+server_core1: max cycles recorded: 0x00000000000019c6
+
+three core, two clients per core
+
+server_core1: sum cycles recorded: 0x0000000026ae99cb
+server_core1: average cycles recorded: 0x00000000000004a7
+server_core1: local count: 0x0000000000084eeb
+server_core1: sum squared cycles recorded: 0x000000b4cf27f6e9
+server_core1: min cycles recorded: 0x0000000000000404
+server_core1: max cycles recorded: 0x0000000000001805
+
+two core, 
+
+server_core0: sum cycles recorded: 0x0000000026b0317a
+server_core0: average cycles recorded: 0x0000000000000575
+server_core0: local count: 0x00000000000716bc
+server_core0: sum squared cycles recorded: 0x000000d43b29dbc6
+server_core0: min cycles recorded: 0x0000000000000472
+server_core0: max cycles recorded: 0x0000000000000d0d
+
+
+four core, 1 client per core, multikernel (no local contention)
+
+server_core1: sum cycles recorded: 0x000000001a11cfcf
+server_core1: average cycles recorded: 0x00000000000004c4
+server_core1: local count: 0x000000000005784b
+server_core1: sum squared cycles recorded: 0x0000007ccef2fe29
+server_core1: min cycles recorded: 0x0000000000000426
+server_core1: max cycles recorded: 0x0000000000001a31
+
+three cores, 1 client
+
+server_core0: sum cycles recorded: 0x000000002685ce76
+server_core0: average cycles recorded: 0x0000000000000572
+server_core0: local count: 0x000000000007121b
+server_core0: sum squared cycles recorded: 0x000000d3033a4834
+server_core0: min cycles recorded: 0x0000000000000478
+server_core0: max cycles recorded: 0x0000000000001637
+
+two core
+
+server_core0: sum cycles recorded: 0x000000002685cc68
+server_core0: average cycles recorded: 0x0000000000000571
+server_core0: local count: 0x0000000000071452
+server_core0: sum squared cycles recorded: 0x000000d2c23c78a6
+server_core0: min cycles recorded: 0x0000000000000476
+server_core0: max cycles recorded: 0x0000000000000d97
+
+
+
+
+
+two core, three local client, SMP
+
+server_shared: sum cntvct ticks in cycles recorded: 0x00000001b9e2bea8
+server_shared: average cntvct ticks in cycles recorded: 0x0000000000001cf5
+server_shared: local sample count: 0x00000000000f4240
+server_shared: sum squared cntvct ticks in cycles recorded: 0x000037b578e79090
+server_shared: min cntvct ticks in cycles recorded: 0x0000000000000e42
+server_shared: max cntvct ticks in cycles recorded: 0x000000000004d454
+
+three core, three local client
+
+server_shared: sum cntvct ticks in cycles recorded: 0x000000023eb78456
+server_shared: average cntvct ticks in cycles recorded: 0x00000000000025aa
+server_shared: local sample count: 0x00000000000f4240
+server_shared: sum squared cntvct ticks in cycles recorded: 0x00005681ff416c0c
+server_shared: min cntvct ticks in cycles recorded: 0x0000000000000e42
+server_shared: max cntvct ticks in cycles recorded: 0x00000000000368a8
+
+four core
+
+server_shared: sum cntvct ticks in cycles recorded: 0x0000000244d2e7ae
+server_shared: average cntvct ticks in cycles recorded: 0x0000000000002610
+server_shared: local sample count: 0x00000000000f4240
+server_shared: sum squared cntvct ticks in cycles recorded: 0x000058a1082b58fc
+server_shared: min cntvct ticks in cycles recorded: 0x0000000000001068
+server_shared: max cntvct ticks in cycles recorded: 0x000000000004cf0e
+
+
+two cores, two local client, SMP
+
+server_shared: sum cntvct ticks in cycles recorded: 0x00000001d52c3338
+server_shared: average cntvct ticks in cycles recorded: 0x0000000000001ebf
+server_shared: local sample count: 0x00000000000f4240
+server_shared: sum squared cntvct ticks in cycles recorded: 0x000042037b52bcf8
+server_shared: min cntvct ticks in cycles recorded: 0x00000000000015e0
+server_shared: max cntvct ticks in cycles recorded: 0x0000000000181b4a
+
+three cores, 
+
+server_shared: sum cntvct ticks in cycles recorded: 0x00000002445901a0
+server_shared: average cntvct ticks in cycles recorded: 0x0000000000002608
+server_shared: local sample count: 0x00000000000f4240
+server_shared: sum squared cntvct ticks in cycles recorded: 0x000058206447b9e0
+server_shared: min cntvct ticks in cycles recorded: 0x0000000000000e42
+server_shared: max cntvct ticks in cycles recorded: 0x000000000004d1fc
+
+four cores,
+
+server_shared: sum cntvct ticks in cycles recorded: 0x00000002572eb482
+server_shared: average cntvct ticks in cycles recorded: 0x0000000000002744
+server_shared: local sample count: 0x00000000000f4240
+server_shared: sum squared cntvct ticks in cycles recorded: 0x00006f3ad157a1cc
+server_shared: min cntvct ticks in cycles recorded: 0x0000000000001004
+server_shared: max cntvct ticks in cycles recorded: 0x00000000001005f4
+
+
+
+four cores, no local contention, SMP
+
+server_shared: sum cntvct ticks in cycles recorded: 0x000000024ad1c12a
+server_shared: average cntvct ticks in cycles recorded: 0x0000000000002675
+server_shared: local sample count: 0x00000000000f4240
+server_shared: sum squared cntvct ticks in cycles recorded: 0x000059dcc867f1d4
+server_shared: min cntvct ticks in cycles recorded: 0x0000000000001cb6
+server_shared: max cntvct ticks in cycles recorded: 0x0000000000065b26
+
+three cores,
+
+server_shared: sum cntvct ticks in cycles recorded: 0x000000024b678f5c
+server_shared: average cntvct ticks in cycles recorded: 0x000000000000267f
+server_shared: local sample count: 0x00000000000f4240
+server_shared: sum squared cntvct ticks in cycles recorded: 0x00005a0df3debad8
+server_shared: min cntvct ticks in cycles recorded: 0x0000000000001cb6
+server_shared: max cntvct ticks in cycles recorded: 0x000000000004cf72
+
+two cores,
+
+server_shared: sum cntvct ticks in cycles recorded: 0x000000024de247d6
+server_shared: average cntvct ticks in cycles recorded: 0x00000000000026a8
+server_shared: local sample count: 0x00000000000f4240
+server_shared: sum squared cntvct ticks in cycles recorded: 0x00005b95b2b8740c
+server_shared: min cntvct ticks in cycles recorded: 0x0000000000001ac2
+server_shared: max cntvct ticks in cycles recorded: 0x000000000004e070

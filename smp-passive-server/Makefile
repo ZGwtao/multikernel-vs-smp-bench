@@ -52,9 +52,10 @@ CLIENT_CORE0_OBJS := client_core0.o
 CLIENT_CORE1_OBJS := client_core1.o
 CLIENT_CORE2_OBJS := client_core2.o
 CLIENT_CORE3_OBJS := client_core3.o
+CLIENT_CONTENDER_OBJS := client_contender.o
 
 # IMAGES := server_core0.elf server_core1.elf client_core0.elf client_core1.elf server_shared.elf
-IMAGES := client_core0.elf client_core1.elf client_core2.elf client_core3.elf server_shared.elf
+IMAGES := client_core0.elf client_core1.elf client_core2.elf client_core3.elf client_contender.elf server_shared.elf
 CFLAGS := -nostdlib -ffreestanding -g -O3 -Wall  -Wno-unused-function -Werror -I$(BOARD_DIR)/include $(CFLAGS_ARCH)
 LDFLAGS := -L$(BOARD_DIR)/lib
 LIBS := -lmicrokit -Tmicrokit.ld
@@ -90,6 +91,9 @@ $(BUILD_DIR)/client_core2.elf: $(addprefix $(BUILD_DIR)/, $(CLIENT_CORE2_OBJS))
 	$(LD) $(LDFLAGS) $^ $(LIBS) -o $@
 
 $(BUILD_DIR)/client_core3.elf: $(addprefix $(BUILD_DIR)/, $(CLIENT_CORE3_OBJS))
+	$(LD) $(LDFLAGS) $^ $(LIBS) -o $@
+
+$(BUILD_DIR)/client_contender.elf: $(addprefix $(BUILD_DIR)/, $(CLIENT_CONTENDER_OBJS))
 	$(LD) $(LDFLAGS) $^ $(LIBS) -o $@
 
 $(IMAGE_FILE) $(REPORT_FILE): $(addprefix $(BUILD_DIR)/, $(IMAGES)) $(SYSTEM_FILE)

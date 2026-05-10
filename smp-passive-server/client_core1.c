@@ -10,6 +10,8 @@
 #define SERVER_CH 10
 #define REMOTE_CH 2
 
+#define LOCAL_CONTENDER_CH 12
+
 void init(void)
 {
     microkit_dbg_puts("CLIENT_CORE1|INFO: init function running\n");
@@ -23,6 +25,7 @@ void notified(microkit_channel ch)
     microkit_dbg_puts("client 1: call server\n");
 #if 1
     microkit_notify(REMOTE_CH);
+    microkit_notify(LOCAL_CONTENDER_CH);
     for (;;) {
 #if 0
         for (int i = 0; i < 1000; i++) {
