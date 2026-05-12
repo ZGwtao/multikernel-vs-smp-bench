@@ -11,8 +11,17 @@
  SPDX-License-Identifier: BSD-2-Clause
 -->
 <system>
+#if defined(CONFIG_PLAT_MAAXBOARD)
+    <memory_region name="uart" size="0x1000" phys_addr="0x30860000" />
+#elif defined(CONFIG_PLAT_ODROIDC4)
     <memory_region name="uart" size="0x1000" phys_addr="0xff803000" />
-
+#elif defined(CONFIG_PLAT_TQMA8XQP1GB)
+    <memory_region name="uart" size="0x1000" phys_addr="0x5a070000" />
+#elif defined(CONFIG_PLAT_BCM2711)
+    <memory_region name="uart" size="0x1000" phys_addr="0xfe215000" />
+#else
+#error "unsupported board"
+#endif
     <!-- Benchmark: low to high, no interference, ppc. -->
     <memory_region name="ppc_no_interference" size="0x1000" />
 

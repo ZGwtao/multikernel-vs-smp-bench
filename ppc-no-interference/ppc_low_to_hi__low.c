@@ -9,7 +9,7 @@
 #include <assert.h>
 
 #define CONFIG_BREAK_DOWN_ANALYSIS 1
-#undef CONFIG_BREAK_DOWN_ANALYSIS
+// #undef CONFIG_BREAK_DOWN_ANALYSIS
 
 #include "benchmark.h"
 #include "config.h"
@@ -111,13 +111,13 @@ static inline void kernel_logging_dump_full_log(kernel_log_entry_t *logBuffer, s
     seL4_Word index = 0;
 
     while ((index * sizeof(kernel_log_entry_t)) < logSize) {
-        if (logBuffer[index].duration != 0) {
+        // if (logBuffer[index].duration != 0) {
             print("tracepoint id = ");
             puthex64(logBuffer[index].id);
             puts(" \tduration = ");
             puthex64(logBuffer[index].duration);
             puts("\n");
-        }
+        // }
         index++;
     }
 
@@ -179,6 +179,10 @@ void init(void)
             /* ==== Benchmark critical ==== */
             {
                 /* Call high (does not switch threads) */
+                // seL4_BenchmarkFlushCaches();
+                // seL4_BenchmarkFlushL1Caches(1); // Instruction Cache
+                // seL4_BenchmarkFlushL1Caches(2); // Data Cache
+                // seL4_BenchmarkFlushL1Caches(3); // Both Caches
                 seL4_Call(BASE_ENDPOINT_CAP + PPC_HI_LO_CHANNEL, microkit_msginfo_new(0, 0));
             }
         }
