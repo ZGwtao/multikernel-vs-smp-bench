@@ -1,0 +1,437 @@
+diff --git a/include/arch/arm/arch/32/mode/machine.h b/include/arch/arm/arch/32/mode/machine.h
+index 6200cd0762c..f3fa54ba2d7 100644
+--- a/include/arch/arm/arch/32/mode/machine.h
++++ b/include/arch/arm/arch/32/mode/machine.h
+@@ -361,9 +361,6 @@ static inline void cleanByVA_PoU(vptr_t vaddr, paddr_t paddr)
+     /* Erratum 586324 -- perform a dummy cached load before flushing. */
+     asm volatile("ldr r0, [sp]" : : : "r0");
+     asm volatile("mcr p15, 0, %0, c7, c11, 1" : : "r"(vaddr));
+-#elif defined(CONFIG_ARCH_ARM_V6)
+-    /* V6 doesn't distinguish PoU and PoC, so use the basic flush. */
+-    asm volatile("mcr p15, 0, %0, c7, c10, 1" : : "r"(vaddr));
+ #elif defined(CONFIG_ARM_CORTEX_A7) || defined(CONFIG_ARM_CORTEX_A15) || \
+     defined(CONFIG_ARM_CORTEX_A53) || defined(CONFIG_ARM_CORTEX_A72)
+     /* Flush to coherency for table walks... Why? */
+diff --git a/include/arch/arm/arch/64/mode/machine.h b/include/arch/arm/arch/64/mode/machine.h
+index d869e39262c..af6d211f003 100644
+--- a/include/arch/arm/arch/64/mode/machine.h
++++ b/include/arch/arm/arch/64/mode/machine.h
+@@ -205,12 +205,15 @@ static inline void setKernelStack(word_t stack_address)
+ 
+ static inline void setVtable(pptr_t addr)
+ {
+-    dsb();
+     if (config_set(CONFIG_ARM_HYPERVISOR_SUPPORT)) {
+         MSR("vbar_el2", addr);
+     } else {
+         MSR("vbar_el1", addr);
+     }
++    /* We just updated the vbar for our current EL, so require
++     * isb to trigger Context Synchronization event to prevent starting
++     * execution of future instructions until current system register
++     * updates are complete. */
+     isb();
+ }
+ 
+@@ -242,18 +245,14 @@ static inline void invalidateLocalTLB_ASID(asid_t asid)
+ {
+     assert(asid < BIT(16));
+ 
+-    dsb();
+     asm volatile("tlbi aside1, %0" : : "r"(asid << 48));
+-    dsb();
+-    isb();
++    dsb_ish();
+ }
+ 
+ static inline void invalidateLocalTLB_VAASID(word_t mva_plus_asid)
+ {
+-    dsb();
+     asm volatile("tlbi vae1, %0" : : "r"(mva_plus_asid));
+-    dsb();
+-    isb();
++    dsb_ish();
+ }
+ 
+ /* Invalidate all stage 1 and stage 2 translations used at
+@@ -275,8 +274,6 @@ static inline void invalidateLocalTLB_IPA(word_t ipa)
+     isb();
+ }
+ 
+-void lockTLBEntry(vptr_t vaddr);
+-
+ static inline void cleanByVA(vptr_t vaddr, paddr_t paddr)
+ {
+     asm volatile("dc cvac, %0" : : "r"(vaddr));
+diff --git a/include/arch/arm/armv/armv8-a/64/armv/machine.h b/include/arch/arm/armv/armv8-a/64/armv/machine.h
+index d98614f9008..4b9db629e02 100644
+--- a/include/arch/arm/armv/armv8-a/64/armv/machine.h
++++ b/include/arch/arm/armv/armv8-a/64/armv/machine.h
+@@ -11,6 +11,11 @@ static inline void dsb(void)
+     asm volatile("dsb sy" ::: "memory");
+ }
+ 
++static inline void dsb_ish(void)
++{
++    asm volatile("dsb ish" ::: "memory");
++}
++
+ static inline void dsb_ishst(void)
+ {
+     asm volatile("dsb ishst" ::: "memory");
+diff --git a/include/arch/arm/armv/armv8-a/64/armv/tlb.h b/include/arch/arm/armv/armv8-a/64/armv/tlb.h
+index 7761618cee5..e1bb234294d 100644
+--- a/include/arch/arm/armv/armv8-a/64/armv/tlb.h
++++ b/include/arch/arm/armv/armv8-a/64/armv/tlb.h
+@@ -13,22 +13,23 @@ static inline void invalidateLocalTLB_VMID(word_t vmid)
+ {
+     word_t vttbr = getVTTBR();
+     word_t v = (vttbr >> 48);
+-    dsb();
+     /* We need to switch to the target VMID for flushing
+      * the TLB if necessary.
+      * Note that an invalid address is used, and it seems
+      * fine. Otherwise, an ASID lookup is required.
+      */
+     if (v != vmid) {
+-        setCurrentUserVSpaceRoot(ttbr_new(vmid, 0));
++        ttbr_t ttbr = ttbr_new(vmid, 0);
++        MSR("vttbr_el2", ttbr.words[0]);
++        isb();
+     }
+-    invalidateLocalTLB_VMALLS12E1();
++    asm volatile("tlbi vmalls12e1");
+     if (v != vmid) {
+         /* Restore the previous VTTBR value */
+-        setCurrentUserVSpaceRoot((ttbr_t) {
+-            .words[0] = vttbr
+-        });
++        MSR("vttbr_el2", vttbr);
++        // isb not required because it comes with eret.
+     }
++    dsb_ish();
+ }
+ 
+ static inline void invalidateLocalTLB_IPA_VMID(word_t ipa_plus_vmid)
+@@ -38,16 +39,20 @@ static inline void invalidateLocalTLB_IPA_VMID(word_t ipa_plus_vmid)
+     word_t vmid = ipa_plus_vmid >> 48;
+     /* The [0:35] bits are IPA, other bits are reserved as 0 */
+     word_t ipa = ipa_plus_vmid & 0xfffffffff;
+-    dsb();
+     if (v != vmid) {
+-        setCurrentUserVSpaceRoot(ttbr_new(vmid, 0));
++        ttbr_t ttbr = ttbr_new(vmid, 0);
++        MSR("vttbr_el2", ttbr.words[0]);
++        isb();
+     }
+-    invalidateLocalTLB_IPA(ipa);
++    asm volatile("tlbi ipas2e1, %0" :: "r"(ipa));
++    asm volatile("tlbi vmalle1");
++
+     if (v != vmid) {
+-        setCurrentUserVSpaceRoot((ttbr_t) {
+-            .words[0] = vttbr
+-        });
++        /* Restore the previous VTTBR value */
++        MSR("vttbr_el2", vttbr);
++        // isb not required because it comes with eret.
+     }
++    dsb_ish();
+ }
+ 
+ 
+diff --git a/src/arch/arm/64/head.S b/src/arch/arm/64/head.S
+index 65b35d7af56..ecf0a20e717 100644
+--- a/src/arch/arm/64/head.S
++++ b/src/arch/arm/64/head.S
+@@ -92,6 +92,11 @@ BEGIN_FUNC(_start)
+     orr     x4, x4, x19
+     bic     x4, x4, x20
+     msr     SCTLR, x4
++    /* We just updated the SCTLR for our current EL, so require
++     * isb to trigger Context Synchronization event to prevent starting
++     * execution of future instructions until current system register
++     * updates are complete. */
++    isb
+ 
+ #ifdef ENABLE_SMP_SUPPORT
+     /* tpidr_el1 has the logic ID of the core, starting from 0 */
+diff --git a/src/arch/arm/64/kernel/vspace.c b/src/arch/arm/64/kernel/vspace.c
+index 08f7937ee45..07da8efc307 100644
+--- a/src/arch/arm/64/kernel/vspace.c
++++ b/src/arch/arm/64/kernel/vspace.c
+@@ -220,7 +220,7 @@ BOOT_CODE void map_kernel_frame(paddr_t paddr, pptr_t vaddr, vm_rights_t vm_righ
+     word_t shareable;
+     if (vm_attributes_get_armPageCacheable(attributes)) {
+         attr_index = NORMAL;
+-        shareable = SMP_TERNARY(SMP_SHARE, 0);
++        shareable = SMP_SHARE;
+     } else {
+         attr_index = DEVICE_nGnRnE;
+         shareable = 0;
+@@ -277,7 +277,7 @@ BOOT_CODE void map_kernel_window(void)
+                                                                                                                         paddr,
+                                                                                                                         0,                        /* global */
+                                                                                                                         1,                        /* access flag */
+-                                                                                                                        SMP_TERNARY(SMP_SHARE, 0),        /* Inner-shareable if SMP enabled, otherwise unshared */
++                                                                                                                        SMP_SHARE,        /* Inner-shareable if SMP enabled, otherwise unshared */
+                                                                                                                         0,                        /* VMKernelOnly */
+                                                                                                                         NORMAL
+                                                                                                                     );
+@@ -336,7 +336,7 @@ static BOOT_CODE void map_it_frame_cap(cap_t vspace_cap, cap_t frame_cap, bool_t
+                                                               1,                              /* not global */
+ #endif
+                                                               1,                              /* access flag */
+-                                                              SMP_TERNARY(SMP_SHARE, 0),              /* Inner-shareable if SMP enabled, otherwise unshared */
++                                                              SMP_SHARE,              /* Inner-shareable if SMP enabled, otherwise unshared */
+                                                               APFromVMRights(VMReadWrite),
+ #ifdef CONFIG_ARM_HYPERVISOR_SUPPORT
+                                                               S2_NORMAL
+@@ -542,14 +542,48 @@ BOOT_CODE cap_t create_mapped_it_frame_cap(cap_t pd_cap, pptr_t pptr, vptr_t vpt
+ 
+ BOOT_CODE void activate_kernel_vspace(void)
+ {
+-    cleanInvalidateL1Caches();
+-    setCurrentKernelVSpaceRoot(ttbr_new(0, addrFromKPPtr(armKSGlobalKernelPGD)));
++    // This function updates the ttbr registers for the current executing program context.
++    // We assume that all mapping entries in use to execute the current function are
++    // have the same values in both sets of page tables. This is so that any translations
++    // used between setting the new ttbr value and invalidating the TLB are the same whether
++    // they are returned from the TLB cache or looked up in memory.
++
++    // When this function is called, there are recent writes to page tables that haven't been
++    // synchronized yet.
++    // Once this function returns, the updated mmu configuration for the current program should
++    // be active and all pending effects synchronized with the instruction stream.
++    // No dcache or icache clean/invalidate operations should be required under aarch64.
++    // tlb cache does need invalidation after the updates to registers that are permitted to be
++    // cached in the tlb.
++    // dsb ish is needed to ensure any cache maintenance operation completes.
++    // isb is needed to ensure that writes to system registers have completed before the next
++    // instructions start any part of their execution.
++    // See architecture requirements on Context Synchronization events for more information.
++
++    // Complete recent memory writes to new page tables to inner shareable domain.
++    dsb_ish();
++
++    // Construct ttbr value for kernel page tables
++    ttbr_t ttbr_k = ttbr_new(0, addrFromKPPtr(armKSGlobalKernelPGD));
+ 
+-    /* Prevent elf-loader address translation to fill up TLB */
+-    setCurrentUserVSpaceRoot(ttbr_new(0, addrFromKPPtr(armKSGlobalUserVSpace)));
+-
+-    invalidateLocalTLB();
+-    lockTLBEntry(KERNEL_ELF_BASE);
++    if (config_set(CONFIG_ARM_HYPERVISOR_SUPPORT)) {
++        // In hyp mode there is just 1 ttbr at EL2.
++        // Assign, then synchronize instruction stream, then invalidate all tlb for el2.
++        MSR("ttbr0_el2", ttbr_k.words[0]);
++        isb();
++        asm volatile("tlbi alle2");
++    } else {
++        // In el1 mode there are 2 ttbr at EL1.
++        // Assign both, then synchronize instruction stream, then invalidate all tlb for el1.
++        ttbr_t ttbr_u = ttbr_new(0, addrFromKPPtr(armKSGlobalUserVSpace));
++        MSR("ttbr1_el1", ttbr_k.words[0]);
++        MSR("ttbr0_el1", ttbr_u.words[0]);
++        isb();
++        asm volatile("tlbi vmalle1");
++    }
++    // dsb ish to barrier for tlb invalidation to complete, then synchronize instruction stream.
++    dsb_ish();
++    isb();
+ }
+ 
+ BOOT_CODE void write_it_asid_pool(cap_t it_ap_cap, cap_t it_vspace_cap)
+@@ -699,7 +733,7 @@ static pte_t makeUserPagePTE(paddr_t paddr, vm_rights_t vm_rights, vm_attributes
+ #endif
+ 
+     /* Inner-shareable if SMP enabled, otherwise unshared (ignored for devices) */
+-    word_t shareable = cacheable ? SMP_TERNARY(SMP_SHARE, 0) : 0;
++    word_t shareable = cacheable ? SMP_SHARE : 0;
+ 
+     if (page_size == ARMSmallPage) {
+         return pte_pte_4k_page_new(nonexecutable, paddr, nG, 1 /* access flag */,
+@@ -1028,7 +1062,7 @@ void unmapPageTable(asid_t asid, vptr_t vptr, pte_t *target_pt)
+     /* If we found a pt then ptSlot won't be null */
+     assert(ptSlot != NULL);
+     *ptSlot = pte_pte_invalid_new();
+-    cleanByVA_PoU((vptr_t)ptSlot, pptr_to_paddr(ptSlot));
++    // dsb ish performed as part of invalidate
+     invalidateTLBByASID(asid);
+ }
+ 
+@@ -1061,8 +1095,8 @@ void unmapPage(vm_page_size_t page_size, asid_t asid, vptr_t vptr, pptr_t pptr)
+     }
+ 
+     *(lu_ret.ptSlot) = pte_pte_invalid_new();
+-    cleanByVA_PoU((vptr_t)lu_ret.ptSlot, pptr_to_paddr(lu_ret.ptSlot));
+     assert(asid < BIT(16));
++    // dsb ish performed as part of invalidate
+     invalidateTLBByASIDVA(asid, vptr);
+ }
+ 
+@@ -1175,8 +1209,7 @@ static exception_t performPageTableInvocationMap(cap_t cap, cte_t *ctSlot, pte_t
+ {
+     ctSlot->cap = cap;
+     *ptSlot = pte;
+-    cleanByVA_PoU((vptr_t)ptSlot, pptr_to_paddr(ptSlot));
+-
++    dsb_ish();
+     return EXCEPTION_NONE;
+ }
+ 
+@@ -1186,7 +1219,7 @@ static exception_t performPageTableInvocationUnmap(cap_t cap, cte_t *ctSlot)
+         pte_t *pt = PT_PTR(cap_page_table_cap_get_capPTBasePtr(cap));
+         unmapPageTable(cap_page_table_cap_get_capPTMappedASID(cap),
+                        cap_page_table_cap_get_capPTMappedAddress(cap), pt);
+-        clearMemory_PT((void *)pt, cap_get_capSizeBits(cap));
++        clearMemory((void *)pt, cap_get_capSizeBits(cap));
+     }
+ 
+     cap_page_table_cap_ptr_set_capPTIsMapped(&(ctSlot->cap), 0);
+@@ -1201,10 +1234,12 @@ static exception_t performPageInvocationMap(asid_t asid, cap_t cap, cte_t *ctSlo
+     ctSlot->cap = cap;
+     *ptSlot = pte;
+ 
+-    cleanByVA_PoU((vptr_t)ptSlot, pptr_to_paddr(ptSlot));
+     if (unlikely(tlbflush_required)) {
+         assert(asid < BIT(16));
++        // dsb ish performed as part of invalidate
+         invalidateTLBByASIDVA(asid, cap_frame_cap_get_capFMappedAddress(cap));
++    } else {
++        dsb_ish();
+     }
+ 
+     return EXCEPTION_NONE;
+@@ -1992,7 +2027,7 @@ exception_t benchmark_arch_map_logBuffer(word_t frame_cptr)
+                              ksUserLogBuffer,
+                              0,                         /* global */
+                              1,                         /* access flag */
+-                             SMP_TERNARY(SMP_SHARE, 0), /* Inner-shareable if SMP enabled, otherwise unshared */
++                             SMP_SHARE, /* Inner-shareable if SMP enabled, otherwise unshared */
+                              0,                         /* VMKernelOnly */
+                              NORMAL_WT);
+ 
+diff --git a/src/arch/arm/64/object/objecttype.c b/src/arch/arm/64/object/objecttype.c
+index 08fb4f23159..00247f68b8c 100644
+--- a/src/arch/arm/64/object/objecttype.c
++++ b/src/arch/arm/64/object/objecttype.c
+@@ -449,9 +449,6 @@ cap_t Arch_createObject(object_t t, void *regionBase, word_t userSize, bool_t de
+         /** AUXUPD: "(True, ptr_retyps 1
+               (Ptr (ptr_val \<acute>regionBase) :: (pte_C[vs_array_len]) ptr))" */
+         /** GHOSTUPD: "(True, gs_new_pt_t VSRootPT_T (ptr_val \<acute>regionBase))" */
+-        cleanCacheRange_PoU((word_t)regionBase,
+-                            (word_t)regionBase + MASK(seL4_VSpaceBits),
+-                            addrFromPPtr(regionBase));
+ #ifdef CONFIG_ARM_SMMU
+         return cap_vspace_cap_new(
+                    asidInvalid,           /* capVSMappedASID */
+@@ -470,9 +467,6 @@ cap_t Arch_createObject(object_t t, void *regionBase, word_t userSize, bool_t de
+         /** AUXUPD: "(True, ptr_retyps 1
+               (Ptr (ptr_val \<acute>regionBase) :: (pte_C[pt_array_len]) ptr))" */
+         /** GHOSTUPD: "(True, gs_new_pt_t NormalPT_T (ptr_val \<acute>regionBase))" */
+-        cleanCacheRange_PoU((word_t)regionBase,
+-                            (word_t)regionBase + MASK(seL4_PageTableBits),
+-                            addrFromPPtr(regionBase));
+         return cap_page_table_cap_new(
+                    asidInvalid,           /* capPTMappedASID    */
+                    (word_t)regionBase,    /* capPTBasePtr       */
+diff --git a/src/arch/arm/armv/armv8-a/64/machine_asm.S b/src/arch/arm/armv/armv8-a/64/machine_asm.S
+deleted file mode 100644
+index dcbfc5f6838..00000000000
+--- a/src/arch/arm/armv/armv8-a/64/machine_asm.S
++++ /dev/null
+@@ -1,11 +0,0 @@
+-/*
+- * Copyright 2020, Data61, CSIRO (ABN 41 687 119 230)
+- *
+- * SPDX-License-Identifier: GPL-2.0-only
+- */
+-
+-#include <machine/assembler.h>
+-
+-BEGIN_FUNC(lockTLBEntry)
+-    ret
+-END_FUNC(lockTLBEntry)
+diff --git a/src/arch/arm/armv/armv8-a/64/user_access.c b/src/arch/arm/armv/armv8-a/64/user_access.c
+index ee94932afa6..f04a77a065d 100644
+--- a/src/arch/arm/armv/armv8-a/64/user_access.c
++++ b/src/arch/arm/armv/armv8-a/64/user_access.c
+@@ -26,6 +26,7 @@ static void check_export_pmu(void)
+     uint32_t val = PMUSERENR_EL0_EN;
+     MSR("PMUSERENR_EL0", val);
+ #endif
++    /* No ISB because we rely on context switch for synchronisation */
+ }
+ 
+ static void check_export_arch_timer(void)
+@@ -55,6 +56,7 @@ static void check_export_arch_timer(void)
+ #endif /* CONFIG_EXPORT_PTMR_USER */
+     MSR("CNTHCTL_EL2", val);
+ #endif /* CONFIG_ARM_HYPERVISOR_SUPPORT */
++    /* No ISB because we rely on context switch for synchronisation */
+ }
+ 
+ void armv_init_user_access(void)
+diff --git a/src/arch/arm/armv/armv8-a/config.cmake b/src/arch/arm/armv/armv8-a/config.cmake
+index f2e3c77017a..496c3c7f65b 100644
+--- a/src/arch/arm/armv/armv8-a/config.cmake
++++ b/src/arch/arm/armv/armv8-a/config.cmake
+@@ -5,4 +5,9 @@
+ #
+ 
+ add_sources(DEP "KernelArchArmV8a" PREFIX src/arch/arm/armv/armv8-a/${KernelWordSize}
+-            CFILES cache.c user_access.c ASMFILES machine_asm.S)
++            CFILES cache.c user_access.c)
++
++if("${KernelWordSize}" STREQUAL "32")
++  add_sources(DEP "KernelArchArmV8a" PREFIX src/arch/arm/armv/armv8-a/${KernelWordSize}
++              ASMFILES machine_asm.S)
++endif()
+diff --git a/src/arch/arm/kernel/boot.c b/src/arch/arm/kernel/boot.c
+index 93eb4d1330c..67f2ff816f1 100644
+--- a/src/arch/arm/kernel/boot.c
++++ b/src/arch/arm/kernel/boot.c
+@@ -565,11 +565,13 @@ static BOOT_CODE bool_t try_init_kernel(
+     /* create the idle thread */
+     create_idle_thread();
+ 
++#ifdef CONFIG_ARCH_AARCH32
+     /* Before creating the initial thread (which also switches to it)
+      * we clean the cache so that any page table information written
+      * as a result of calling create_frames_of_region will be correctly
+      * read by the hardware page table walker */
+     cleanInvalidateL1Caches();
++#endif
+ 
+     /* create the initial thread */
+     tcb_t *initial = create_initial_thread(
+@@ -600,6 +602,7 @@ static BOOT_CODE bool_t try_init_kernel(
+     /* finalise the bootinfo frame */
+     bi_finalise();
+ 
++#ifdef CONFIG_ARCH_AARCH32
+     /* Flushing the L1 cache and invalidating the TLB is good enough here to
+      * make sure everything written by the kernel is visible to userland. There
+      * are no uncached userland frames at this stage that require enforcing
+@@ -612,6 +615,19 @@ static BOOT_CODE bool_t try_init_kernel(
+         invalidateHypTLB();
+     }
+ 
++#else
++    if (config_set(CONFIG_ARM_HYPERVISOR_SUPPORT)) {
++        // Need to invalidate EL1/0 TLB entries in case there were any stale ones.
++        // For non-hyp kernel we already invalidated the EL1/0 entries when activating kernel
++        // vspace. And invalid entries are not permitted to be cached.
++        // dsb and isb for this operation are handled with following dsb and eret.
++        asm volatile("tlbi alle1");
++    }
++    // Barrier to ensure user space page table updates have completed before switching.
++    dsb_ish();
++    // Don't need ISB here because we are eret soon.
++#endif
++
+     ksNumCPUs = 1;
+ 
+     /* initialize BKL before booting up other cores */
