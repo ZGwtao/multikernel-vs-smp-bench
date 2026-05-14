@@ -1,0 +1,29 @@
+From c076a1f18fa5a1e699711e9a082542cc5383fab4 Mon Sep 17 00:00:00 2001
+From: Guangtao Zhu <guangtaozhu@outlook.com>
+Date: Thu, 14 May 2026 22:29:52 +1000
+Subject: [PATCH 2/2] fix PMU access
+
+Signed-off-by: Guangtao Zhu <guangtaozhu@outlook.com>
+---
+ src/arch/arm/kernel/boot.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/arch/arm/kernel/boot.c b/src/arch/arm/kernel/boot.c
+index 1535755b7..fa36f6644 100644
+--- a/src/arch/arm/kernel/boot.c
++++ b/src/arch/arm/kernel/boot.c
+@@ -627,9 +627,10 @@ static BOOT_CODE bool_t try_init_kernel(
+     SMP_COND_STATEMENT(clh_lock_init());
+     SMP_COND_STATEMENT(release_secondary_cpus());
+ 
++#ifdef CONFIG_ENABLE_BENCHMARKS
+     sel4bench_init();
+     SYSTEM_WRITE_WORD(PMEVTYPER, (1 << 30) | (1 << 27) | 0x8);
+-
++#endif
+     uint64_t v;
+ 
+     asm volatile("mrs %0, cntkctl_el1" : "=r"(v));
+-- 
+2.43.0
+
