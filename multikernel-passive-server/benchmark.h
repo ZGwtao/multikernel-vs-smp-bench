@@ -18,8 +18,6 @@
 #define BENCHMARK_START_STOP_CH 0
 
 #define RECORDING_BEGIN()                                                      \
-  pmu_enable();                                                                \
-  print("BEGIN\n");                                                            \
   cycles_t sample;                                                             \
   uint64_t sum = 0;                                                            \
   uint64_t sum_squared = 0;                                                    \
@@ -45,7 +43,6 @@ typedef struct {
 #define RECORDING_END(results_ptr)                              \
   do {                                                                         \
     /* TODO: cache flushes for multicore? */                                   \
-    print("END\n");                                                            \
     result_t *_results = (void *)results_ptr;                \
     _results->sum = sum;                                         \
     _results->sum_squared = sum_squared;                         \

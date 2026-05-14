@@ -18,14 +18,33 @@ uintptr_t data_region_vaddr;
 
 #define SHARED_TIME_STAMP_OFFSET 8UL
 
-static inline seL4_Word *shared_data_region_addr(void)
+static inline seL4_Word *shared_data_region_addr(seL4_Word index)
 {
-    return (seL4_Word *)data_region_vaddr;
+    return (seL4_Word *)(data_region_vaddr + index);
 }
 
 static inline seL4_Word *shared_time_stamp_addr(void)
 {
-    return (seL4_Word *)(shared_region_vaddr + SHARED_TIME_STAMP_OFFSET);
+    return (seL4_Word *)(data_region_vaddr + SHARED_TIME_STAMP_OFFSET);
+}
+
+#define SAMPLE_OFFSET 16UL
+#define SUM_OFFSET 17UL
+#define SUM_SQUARED_OFFSET 18UL
+#define MIN_OFFSET 19UL
+#define MAX_OFFSET 20UL
+#define LAST_START_OFFSET 21UL
+#define LAST_END_OFFSET 22UL
+
+static inline seL4_Word read_shared_data(seL4_Word index)
+{
+    return *shared_data_region_addr(index);
+}
+
+static inline seL4_Word write_shared_data(seL4_Word index, seL4_Word value)
+{
+    *shared_data_region_addr(index) = value;
+    return value;
 }
 
 /*
@@ -156,10 +175,18 @@ shared_lock_init(void)
     __asm__ volatile("dmb ish" ::: "memory");
 }
 
+static inline uint64_t read_cntvct(void)
+{
+    uint64_t v;
+    asm volatile("isb" ::: "memory");
+    asm volatile("mrs %0, cntvct_el0" : "=r"(v));
+    return v;
+}
+
 microkit_msginfo protected(microkit_channel ch, microkit_msginfo msginfo)
 {
     // if you comment out the shared lock calls, you will likely see interleaved prints from both cores
-    shared_lock_acquire();
+    // shared_lock_acquire();
 #if 0
         switch (microkit_msginfo_get_label(msginfo)) {
         case 1:
@@ -176,32 +203,100 @@ microkit_msginfo protected(microkit_channel ch, microkit_msginfo msginfo)
             microkit_dbg_puts("SERVER_SHARED|ERROR: received an unexpected message\n");
         }
 #else
-    {
-        seL4_Word *shared_data = shared_data_region_addr();
-        if ((*shared_data > 1000000)) {
-            for (;;) {}
-        }
-        
-        seL4_Word *time_stamp_addr = shared_time_stamp_addr();
-        if ((*time_stamp_addr == 0)) {
-            *time_stamp_addr = (seL4_Word)pmu_read_cycles();
-        }
-
-        (*shared_data)++;
-
-        if ((*shared_data > 1000000)) {
-            cycles_t now = pmu_read_cycles();
-            cycles_t start = *time_stamp_addr;
-            cycles_t elapsed = now - start;
-            puts("\n");
-            print("cycles per increment: ");
-            puthex64(elapsed / (*shared_data));
-            puts("\n");
-            for (;;) {}
-        }
-    }
 #endif
-    shared_lock_release();
+    // shared_lock_release();
+
+    cycles_t start = 0;
+    cycles_t last = 0;
+    cycles_t gap = 0;
+    seL4_Word local_cnt = 0;
+
+    RECORDING_BEGIN()
+
+    seL4_Word badge;
+    seL4_MessageInfo_t tag UNUSED;
+    seL4_MessageInfo_t reply_tag = microkit_msginfo_new(0, 0);
+    /* To make this simpler this literally just always replies */
+    while (1) {
+        shared_lock_acquire();
+        {
+            start = read_cntvct() * 50;
+            if (last != 0) {
+                gap = start - last;
+            }
+            if (gap != 0) {
+                RECORDING_ADD_SAMPLE(last, start)
+                // print("sample recorded: ");
+                // puthex64(sample);
+                // puts(", end: ");
+                // puthex64(end);
+                // puts(", start: ");
+                // puthex64(read_shared_data(LAST_START_OFFSET));
+                // puts("\n");
+                // cycles_t sum = read_shared_data(SUM_OFFSET);
+                // cycles_t sum_squared = read_shared_data(SUM_SQUARED_OFFSET);
+                // cycles_t min = read_shared_data(MIN_OFFSET);
+                // cycles_t max = read_shared_data(MAX_OFFSET);
+                // asm volatile("" ::: "memory");
+                // write_shared_data(SUM_OFFSET, sum + sample);
+                // write_shared_data(SUM_SQUARED_OFFSET, sum_squared + sample * sample);
+                // write_shared_data(MIN_OFFSET, (sample < min) ? sample : min);
+                // write_shared_data(MAX_OFFSET, (sample > max) ? sample : max);
+            }
+            last = start;
+
+            seL4_Word *shared_data = shared_data_region_addr(0);
+            if ((*shared_data > 1000000)) {
+                for (;;) {}
+            }
+            
+            seL4_Word *time_stamp_addr = shared_time_stamp_addr();
+            if ((*time_stamp_addr == 0)) {
+                *time_stamp_addr = (seL4_Word)pmu_read_cycles();
+            }
+
+            (*shared_data)++;
+            local_cnt++;
+
+            if ((*shared_data > 1000000)) {
+                cycles_t now = pmu_read_cycles();
+                cycles_t start = *time_stamp_addr;
+                cycles_t elapsed = now - start;
+                puts("\n");
+                print("cycles per increment: ");
+                puthex64(elapsed / (*shared_data));
+                puts("\n");
+                print("total cycles: ");
+                puthex64(elapsed);
+                puts("\n");
+                print("sum cycles recorded: ");
+                puthex64(sum);
+                puts("\n");
+                print("average cycles recorded: ");
+                puthex64(sum / local_cnt);
+                puts("\n");
+                print("local count: ");
+                puthex64(local_cnt);
+                puts("\n");
+                print("sum squared cycles recorded: ");
+                puthex64(sum_squared);
+                puts("\n");
+                print("min cycles recorded: ");
+                puthex64(min);
+                puts("\n");
+                print("max cycles recorded: ");
+                puthex64(max);
+                puts("\n");
+
+                shared_lock_release();
+                for (;;) {}
+            }
+        }
+        shared_lock_release();
+
+        /* the reason we put the INPUT_CAP here is the call comes from it */
+        tag = seL4_ReplyRecv(INPUT_CAP, reply_tag, &badge, REPLY_CAP);
+    }
 
     return seL4_MessageInfo_new(0, 0, 0, 0);
 }
@@ -214,6 +309,13 @@ void init(void)
      */
     shared_lock_init();
     pmu_enable();
+    write_shared_data(SUM_OFFSET, 0);
+    write_shared_data(SUM_SQUARED_OFFSET, 0);
+    write_shared_data(MIN_OFFSET, CYCLES_MAX);
+    write_shared_data(MAX_OFFSET, CYCLES_MIN);
+    write_shared_data(SAMPLE_OFFSET, 0);
+    write_shared_data(LAST_START_OFFSET, 0);
+    write_shared_data(LAST_END_OFFSET, 0);
     microkit_dbg_puts("SERVER_SHARED|INFO: init function running\n");
 }
 

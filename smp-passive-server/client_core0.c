@@ -13,7 +13,8 @@
 #define REMOTE_CORE_2_CH 3
 #define REMOTE_CORE_3_CH 4
 
-#define LOCAL_CONTENDER_CH 12
+#define LOCAL_CONTENDER1_CH 12
+#define LOCAL_CONTENDER2_CH 13
 
 void init(void)
 {
@@ -32,7 +33,8 @@ void notified(microkit_channel ch)
     microkit_dbg_puts("CLIENT_CORE0|INFO: received notification from core 1\n");
     microkit_dbg_puts("client 0 - call server on 0\n");
 #if 1
-    microkit_notify(LOCAL_CONTENDER_CH);
+    microkit_notify(LOCAL_CONTENDER1_CH);
+    microkit_notify(LOCAL_CONTENDER2_CH);
     for (;;) {
 #if 0
         for (int i = 0; i < 1000; i++) {
