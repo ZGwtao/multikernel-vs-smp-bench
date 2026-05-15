@@ -1,0 +1,61 @@
+
+gcc 15.2.0
+
+- 1 core, 1 client per core, SMP
+    + 1846
+- 1 core, 2 client per core, SMP
+    + 1870
+- 1 core, 3 client per core, SMP
+    + 1925
+
+- 2 core, 1 client per core, SMP
+    + 8145 cycles per round-trip
+- 2 core, 2 client per core, SMP
+    + 6502 cycles per round-trip
+- 2 core, 3 client per core, SMP
+    + 6012 cycles per round-trip
+
+- 3 core, 1 client, SMP
+    + 8143
+- 3 core, 2 client, SMP
+    + 8245
+- 3 core, 3 client, SMP
+    + 8025
+
+- 4 core, 1 client, SMP
+    + 8189
+- 4 core, 2 client, SMP
+    + 8112
+- 4 core, 3 client, SMP
+    + 7855
+
+gcc 11.3.0
+
+- 1 core, 1 client per core, SMP
+    + 1499
+- 1 core, 2 client per core, SMP
+    + 1500
+- 1 core, 3 client per core, SMP
+    + 1527
+
+- 2 core, 1 client per core, SMP
+    + 7701 cycles per round-trip
+- 2 core, 2 client per core, SMP
+    + 6099 cycles per round-trip
+- 2 core, 3 client per core, SMP
+    + 5636 cycles per round-trip
+
+- 3 core, 1 client, SMP
+    + 7863
+- 3 core, 2 client, SMP
+    + 8012
+- 3 core, 3 client, SMP
+    + 7716
+
+- 4 core, 1 client, SMP
+    + 7762
+- 4 core, 2 client, SMP
+    + 7909
+- 4 core, 3 client, SMP
+    + 7646
+
