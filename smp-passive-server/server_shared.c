@@ -40,13 +40,12 @@ microkit_msginfo protected(microkit_channel ch, microkit_msginfo msginfo)
 
     seL4_Word badge;
     seL4_MessageInfo_t tag UNUSED;
-    seL4_MessageInfo_t reply_tag = microkit_msginfo_new(0, 0);
+    seL4_MessageInfo_t reply_tag = microkit_msginfo_new(0, 1);
 
     cycles_t start = 0;
 
     while (1) {
         curr = read_cntvct() * 50;
-
         if (last != 0) {
             gap = curr - last;
 
@@ -59,59 +58,24 @@ microkit_msginfo protected(microkit_channel ch, microkit_msginfo msginfo)
         }
 
         last = curr;
-
-        if (flag) {
-            for (;;) {}
-        }
-
+        // if (flag) {
+        //     seL4_SetMR(0, local_cnt);
+        //     seL4_SetMR(1, start);
+        //     tag = seL4_ReplyRecv(INPUT_CAP, microkit_msginfo_new(0, 2), &badge, REPLY_CAP);
+        //     microkit_dbg_puts("Server: reached 1000000\n");
+        //     // for (;;) {}
+        // }
         if (local_cnt >= 1000000) {
-            flag = 1;
-
-            cycles_t now = read_cntvct() * 50;
-            cycles_t elapsed = now - start;
-            
-            print("global time elapsed in cycles: ");
-            puthex64(elapsed);
-            puts("\n");
-
-            print("average cycles per increment: ");
-            puthex64(elapsed / local_cnt);
-            puts("\n");
-
-            print("CNTFRQ_EL0: ");
-            puthex64(read_cntfrq());
-            puts("\n");
-
-            print("sum cntvct ticks in cycles recorded: ");
-            puthex64(sum);
-            puts("\n");
-
-            print("average cntvct ticks in cycles recorded: ");
-            puthex64(sum / local_cnt);
-            puts("\n");
-
-            print("local sample count: ");
-            puthex64(local_cnt);
-            puts("\n");
-
-            print("sum squared cntvct ticks in cycles recorded: ");
-            puthex64(sum_squared);
-            puts("\n");
-
-            print("min cntvct ticks in cycles recorded: ");
-            puthex64(min);
-            puts("\n");
-
-            print("max cntvct ticks in cycles recorded: ");
-            puthex64(max);
-            puts("\n");
-
-            for (;;) {}
+            // flag = 1;
+            seL4_SetMR(0, local_cnt);
+            seL4_SetMR(1, start);
+            tag = seL4_ReplyRecv(INPUT_CAP, microkit_msginfo_new(0, 2), &badge, REPLY_CAP);
+            // microkit_dbg_puts("Server: reached 1000000\n");
+        } else {
+            seL4_SetMR(0, local_cnt);
+            tag = seL4_ReplyRecv(INPUT_CAP, reply_tag, &badge, REPLY_CAP);
         }
-
-        tag = seL4_ReplyRecv(INPUT_CAP, reply_tag, &badge, REPLY_CAP);
     }
-
     return seL4_MessageInfo_new(0, 0, 0, 0);
 }
 
@@ -123,7 +87,7 @@ void init(void)
     last = 0;
     gap = 0;
     curr = 0;
-    flag = 0;
+    // flag = 0;
 }
 
 void notified(microkit_channel ch) {}

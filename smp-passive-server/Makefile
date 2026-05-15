@@ -48,11 +48,11 @@ MICROKIT_TOOL ?= $(MICROKIT_SDK)/bin/microkit
 # SERVER_CORE0_OBJS := server_core0.o
 # SERVER_CORE1_OBJS := server_core1.o
 SERVER_SHARED_OBJS := server_shared.o print.o
-CLIENT_CORE0_OBJS := client_core0.o
-CLIENT_CORE1_OBJS := client_core1.o
-CLIENT_CORE2_OBJS := client_core2.o
-CLIENT_CORE3_OBJS := client_core3.o
-CLIENT_CONTENDER_OBJS := client_contender.o
+CLIENT_CORE0_OBJS := client_core0.o print.o
+CLIENT_CORE1_OBJS := client_core1.o print.o
+CLIENT_CORE2_OBJS := client_core2.o print.o
+CLIENT_CORE3_OBJS := client_core3.o print.o
+CLIENT_CONTENDER_OBJS := client_contender.o print.o
 
 # IMAGES := server_core0.elf server_core1.elf client_core0.elf client_core1.elf server_shared.elf
 IMAGES := client_core0.elf client_core1.elf client_core2.elf client_core3.elf client_contender.elf server_shared.elf
