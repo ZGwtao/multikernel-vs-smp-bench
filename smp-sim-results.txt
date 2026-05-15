@@ -1,0 +1,44 @@
+
+gcc-15.2.1 (aarch64-none-elf)
+
+- 1 core, 1 client, SMP, user+kernel locks
+    + 2205 cycles
+- 1 core, 2 client, SMP, user+kernel locks
+    + 2225 cycles
+
+- 2 core, 1 client, SMP, user+kernel locks
+    + 3443 cycles
+- 2 core, 2 client, SMP, user+kernel locks
+    + 3459 cycles
+
+- 3 core, 1 client, SMP, user+kernel locks
+    + 4016 cycles
+- 3 core, 2 client, SMP, user+kernel locks
+    + 3976 cycles
+
+- 4 core, 1 client, SMP, user+kernel locks
+    + 4239 cycles
+- 4 core, 2 client, SMP, user+kernel locks
+    + 4259 cycles
+
+gcc-11.3.0 (aarch64-none-linux-gnu)
+
+- 1 core, 1 client, SMP, user+kernel locks
+    + 1853 cycles
+- 1 core, 2 client, SMP, user+kernel locks
+    + 1882 cycles
+
+- 2 core, 1 client, SMP, user+kernel locks
+    + 3088 cycles
+- 2 core, 2 client, SMP, user+kernel locks
+    + 3143 cycles
+
+- 3 core, 1 client, SMP, user+kernel locks
+    + 3693 cycles
+- 3 core, 2 client, SMP, user+kernel locks
+    + 3671 cycles
+
+- 4 core, 1 client, SMP, user+kernel locks
+    + 3931 cycles
+- 4 core, 2 client, SMP, user+kernel locks
+    + 3941 cycles

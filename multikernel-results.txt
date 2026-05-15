@@ -1,0 +1,44 @@
+
+gcc-15.2.0
+
+- 1 core, 1 client per core, multikernel
+    + 1388 cycles
+- 1 core, 2 client per core, multikernel
+    + 1393
+
+- 2 core, 1 client per core, multikernel
+    + 667 cycles
+- 2 core, 2 client per core, multikernel
+    + 677 cycles
+
+- 3 core, 1 client per core, multikernel
+    + 459 cycles
+- 3 core, 2 client per core, multikernel
+    + 471 cycles
+
+- 4 core, 1 client per core, multikernel
+    + 367 cycles
+- 4 core, 2 client per core, multikernel
+    + 382 cycles
+
+gcc-11.3.0
+
+- 1 core, 1 client per core, multikernel
+    + 1362 cycles
+- 1 core, 2 client per core, multikernel
+    + 1361
+
+- 2 core, 1 client per core, multikernel
+    + 659 cycles
+- 2 core, 2 client per core, multikernel
+    + 661 cycles
+
+- 3 core, 1 client per core, multikernel
+    + 455 cycles
+- 3 core, 2 client per core, multikernel
+    + 462 cycles
+
+- 4 core, 1 client per core, multikernel
+    + 363 cycles
+- 4 core, 2 client per core, multikernel
+    + 363 cycles
