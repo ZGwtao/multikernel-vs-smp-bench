@@ -17,45 +17,45 @@
         <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
     </protection_domain>
 
-    <protection_domain name="client_core0_local_contender1" priority="99" cpu="0">
+    <!-- <protection_domain name="client_core0_local_contender1" priority="99" cpu="0">
         <program_image path="client_contender.elf" />
         <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
-    </protection_domain>
+    </protection_domain> -->
 
-    <protection_domain name="client_core0_local_contender2" priority="99" cpu="0">
+    <!-- <protection_domain name="client_core0_local_contender2" priority="99" cpu="0">
         <program_image path="client_contender.elf" />
         <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
-    </protection_domain>
+    </protection_domain> -->
 
     <protection_domain name="client_core1" priority="99" cpu="1">
         <program_image path="client_core1.elf" />
         <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
     </protection_domain>
 
-    <protection_domain name="client_core1_local_contender1" priority="99" cpu="1">
+    <!-- <protection_domain name="client_core1_local_contender1" priority="99" cpu="1">
         <program_image path="client_contender.elf" />
         <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
-    </protection_domain>
+    </protection_domain> -->
 
-    <protection_domain name="client_core1_local_contender2" priority="99" cpu="1">
+    <!-- <protection_domain name="client_core1_local_contender2" priority="99" cpu="1">
         <program_image path="client_contender.elf" />
         <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
-    </protection_domain>
+    </protection_domain> -->
 
     <protection_domain name="client_core2" priority="99" cpu="2">
         <program_image path="client_core2.elf" />
         <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
     </protection_domain>
 
-    <protection_domain name="client_core2_local_contender1" priority="99" cpu="2">
+    <!-- <protection_domain name="client_core2_local_contender1" priority="99" cpu="2">
         <program_image path="client_contender.elf" />
         <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
-    </protection_domain>
+    </protection_domain> -->
 
-    <protection_domain name="client_core2_local_contender2" priority="99" cpu="2">
+    <!-- <protection_domain name="client_core2_local_contender2" priority="99" cpu="2">
         <program_image path="client_contender.elf" />
         <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
-    </protection_domain>
+    </protection_domain> -->
 
     <channel>
         <end pd="server_shared" id="5" />
@@ -72,7 +72,7 @@
         <end pd="client_core2" id="10" pp="true" />
     </channel>
 
-    <channel>
+    <!-- <channel>
         <end pd="server_shared" id="15" />
         <end pd="client_core0_local_contender1" id="10" pp="true" />
     </channel>
@@ -85,9 +85,9 @@
     <channel>
         <end pd="server_shared" id="17" />
         <end pd="client_core2_local_contender1" id="10" pp="true" />
-    </channel>
+    </channel> -->
 
-    <channel>
+    <!-- <channel>
         <end pd="server_shared" id="19" />
         <end pd="client_core0_local_contender2" id="10" pp="true" />
     </channel>
@@ -100,7 +100,7 @@
     <channel>
         <end pd="server_shared" id="21" />
         <end pd="client_core2_local_contender2" id="10" pp="true" />
-    </channel>
+    </channel> -->
 
     <channel>
         <end pd="client_core0" id="2" />
@@ -112,7 +112,7 @@
         <end pd="client_core2" id="2" />
     </channel>
 
-    <channel>
+    <!-- <channel>
         <end pd="client_core0" id="12" />
         <end pd="client_core0_local_contender1" id="2" />
     </channel>
@@ -125,9 +125,9 @@
     <channel>
         <end pd="client_core2" id="12" />
         <end pd="client_core2_local_contender1" id="2" />
-    </channel>
+    </channel> -->
 
-    <channel>
+    <!-- <channel>
         <end pd="client_core0" id="13" />
         <end pd="client_core0_local_contender2" id="2" />
     </channel>
@@ -140,6 +140,6 @@
     <channel>
         <end pd="client_core2" id="13" />
         <end pd="client_core2_local_contender2" id="2" />
-    </channel>
+    </channel> -->
 
 </system>

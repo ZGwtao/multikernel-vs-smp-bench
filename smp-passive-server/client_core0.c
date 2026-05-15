@@ -31,13 +31,13 @@ void init(void)
 
     pmu_enable();
 
-    microkit_notify(REMOTE_CORE_1_CH);
-    microkit_notify(REMOTE_CORE_2_CH);
-    microkit_notify(REMOTE_CORE_3_CH);
-}
+//     microkit_notify(REMOTE_CORE_1_CH);
+//     microkit_notify(REMOTE_CORE_2_CH);
+//     microkit_notify(REMOTE_CORE_3_CH);
+// }
 
-void notified(microkit_channel ch)
-{
+// void notified(microkit_channel ch)
+// {
 //     microkit_dbg_puts("CLIENT_CORE0|INFO: received notification from core 1\n");
 //     microkit_dbg_puts("client 0 - call server on 0\n");
 #if 1
@@ -75,4 +75,4 @@ void notified(microkit_channel ch)
 #endif
 }
 
-// void notified(microkit_channel ch) {}
+void notified(microkit_channel ch) {}

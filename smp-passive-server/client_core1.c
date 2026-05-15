@@ -26,14 +26,14 @@ void init(void)
     microkit_dbg_puts("CLIENT_CORE1|INFO: init function running\n");
 
     pmu_enable();
-}
+// }
 
-void notified(microkit_channel ch)
-{
-    microkit_dbg_puts("CLIENT_CORE1|INFO: received notification from core 0\n");
-    microkit_dbg_puts("client 1: call server\n");
+// void notified(microkit_channel ch)
+// {
+//     microkit_dbg_puts("CLIENT_CORE1|INFO: received notification from core 0\n");
+//     microkit_dbg_puts("client 1: call server\n");
 #if 1
-    microkit_notify(REMOTE_CH);
+//     microkit_notify(REMOTE_CH);
     microkit_notify(LOCAL_CONTENDER1_CH);
     microkit_notify(LOCAL_CONTENDER2_CH);
     for (;;) {
@@ -67,3 +67,5 @@ void notified(microkit_channel ch)
     (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(0, 0));
 #endif
 }
+
+void notified(microkit_channel ch) {}
