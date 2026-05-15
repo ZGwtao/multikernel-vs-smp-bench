@@ -24,7 +24,7 @@ BOARD_DIR := $(MICROKIT_SDK)/board/$(MICROKIT_BOARD)/$(MICROKIT_CONFIG)
 ARCH := ${shell grep 'CONFIG_SEL4_ARCH  ' $(BOARD_DIR)/include/kernel/gen_config.h | cut -d' ' -f4}
 
 ifeq ($(ARCH),aarch64)
-  TARGET_TRIPLE := aarch64-none-elf
+  TARGET_TRIPLE := aarch64-none-linux-gnu
   CFLAGS_ARCH := -mstrict-align
 else ifeq ($(ARCH),riscv64)
   TARGET_TRIPLE := riscv64-unknown-elf

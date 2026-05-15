@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <microkit.h>
-#include <assert.h>
+// #include <assert.h>
 
 #include "benchmark.h"
 
@@ -19,20 +19,42 @@
 
 uintptr_t data_region_vaddr;
 
-void init(void)
+static inline uint64_t read_cntvct(void)
 {
-    microkit_dbg_puts("CLIENT_CORE0|INFO: init function running\n");
-
-    microkit_notify(REMOTE_CORE_1_CH);
-    microkit_notify(REMOTE_CORE_2_CH);
-    microkit_notify(REMOTE_CORE_3_CH);
+    uint64_t v;
+    asm volatile("isb" ::: "memory");
+    asm volatile("mrs %0, cntvct_el0" : "=r"(v));
+    return v;
 }
 
-void notified(microkit_channel ch)
+void init(void)
 {
-    microkit_dbg_puts("CLIENT_CORE0|INFO: received SGI from core 1\n");
+//     microkit_dbg_puts("CLIENT_CORE0|INFO: init function running\n");
+
+//     microkit_notify(REMOTE_CORE_1_CH);
+//     microkit_notify(REMOTE_CORE_2_CH);
+//     microkit_notify(REMOTE_CORE_3_CH);
+// }
+
+// void notified(microkit_channel ch)
+// {
+    // microkit_dbg_puts("CLIENT_CORE0|INFO: received SGI from core 1\n");
     microkit_notify(LOCAL_CONTENDER_CH);
     while (1) {
         (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(0, 0));
+        seL4_Word curr = seL4_GetMR(0);
+        if (curr >= 1000000) {
+            cycles_t now = read_cntvct() * 50;
+            cycles_t start = seL4_GetMR(1);
+            for (int i = 0; i < 17000; ++i) {
+                asm volatile ("nop");
+            }
+            puts("\nclient 0: ");
+            puthex64((now - start)/curr);
+            puts("\n");
+            for (;;) {}
+        }
     }
 }
+
+void notified(microkit_channel ch) {}

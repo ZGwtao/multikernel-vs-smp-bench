@@ -6,7 +6,6 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <microkit.h>
-#include <assert.h>
 
 #include "benchmark.h"
 
@@ -206,10 +205,18 @@ microkit_msginfo protected(microkit_channel ch, microkit_msginfo msginfo)
 #endif
     // shared_lock_release();
 
-    cycles_t start = 0;
+    cycles_t curr = 0;
     cycles_t last = 0;
     cycles_t gap = 0;
-    seL4_Word local_cnt = 0;
+    cycles_t start = 0;
+
+    for (;;) {
+        start = read_cntvct() * 50;
+        if (start >= 20000000) {
+            break;
+        }
+    }
+    // seL4_Word local_cnt = 0;
 
     RECORDING_BEGIN()
 
@@ -220,77 +227,25 @@ microkit_msginfo protected(microkit_channel ch, microkit_msginfo msginfo)
     while (1) {
         shared_lock_acquire();
         {
-            start = read_cntvct() * 50;
+            curr = read_cntvct() * 50;
             if (last != 0) {
-                gap = start - last;
+                gap = curr - last;
+            // } else {
+            //     start = curr;
             }
             if (gap != 0) {
-                RECORDING_ADD_SAMPLE(last, start)
-                // print("sample recorded: ");
-                // puthex64(sample);
-                // puts(", end: ");
-                // puthex64(end);
-                // puts(", start: ");
-                // puthex64(read_shared_data(LAST_START_OFFSET));
-                // puts("\n");
-                // cycles_t sum = read_shared_data(SUM_OFFSET);
-                // cycles_t sum_squared = read_shared_data(SUM_SQUARED_OFFSET);
-                // cycles_t min = read_shared_data(MIN_OFFSET);
-                // cycles_t max = read_shared_data(MAX_OFFSET);
-                // asm volatile("" ::: "memory");
-                // write_shared_data(SUM_OFFSET, sum + sample);
-                // write_shared_data(SUM_SQUARED_OFFSET, sum_squared + sample * sample);
-                // write_shared_data(MIN_OFFSET, (sample < min) ? sample : min);
-                // write_shared_data(MAX_OFFSET, (sample > max) ? sample : max);
+                RECORDING_ADD_SAMPLE(last, curr)
             }
-            last = start;
-
+            last = curr;
             seL4_Word *shared_data = shared_data_region_addr(0);
             if ((*shared_data > 1000000)) {
-                for (;;) {}
+                seL4_SetMR(0, (*shared_data));
+                seL4_SetMR(1, start);
+                reply_tag = microkit_msginfo_new(0, 2);
+            } else {
+                seL4_SetMR(0, (*shared_data));
             }
-            
-            seL4_Word *time_stamp_addr = shared_time_stamp_addr();
-            if ((*time_stamp_addr == 0)) {
-                *time_stamp_addr = (seL4_Word)pmu_read_cycles();
-            }
-
             (*shared_data)++;
-            local_cnt++;
-
-            if ((*shared_data > 1000000)) {
-                cycles_t now = pmu_read_cycles();
-                cycles_t start = *time_stamp_addr;
-                cycles_t elapsed = now - start;
-                puts("\n");
-                print("cycles per increment: ");
-                puthex64(elapsed / (*shared_data));
-                puts("\n");
-                print("total cycles: ");
-                puthex64(elapsed);
-                puts("\n");
-                print("sum cycles recorded: ");
-                puthex64(sum);
-                puts("\n");
-                print("average cycles recorded: ");
-                puthex64(sum / local_cnt);
-                puts("\n");
-                print("local count: ");
-                puthex64(local_cnt);
-                puts("\n");
-                print("sum squared cycles recorded: ");
-                puthex64(sum_squared);
-                puts("\n");
-                print("min cycles recorded: ");
-                puthex64(min);
-                puts("\n");
-                print("max cycles recorded: ");
-                puthex64(max);
-                puts("\n");
-
-                shared_lock_release();
-                for (;;) {}
-            }
         }
         shared_lock_release();
 

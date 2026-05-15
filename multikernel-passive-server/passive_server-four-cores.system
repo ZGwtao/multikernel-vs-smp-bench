@@ -24,14 +24,15 @@
 <!-- 
     <protection_domain name="client_core0_contender1" priority="99" cpu="0">
         <program_image path="client_contender.elf" />
+        <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
     </protection_domain> -->
 
     <channel>
         <end pd="server_core0" id="5" />
         <end pd="client_core0" id="0" pp="true" />
     </channel>
-<!-- 
-    <channel>
+
+    <!-- <channel>
         <end pd="server_core0" id="15" />
         <end pd="client_core0_contender1" id="0" pp="true" />
     </channel> -->
@@ -48,9 +49,10 @@
         <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
         <map mr="data_region" vaddr="0xffd00000" cached="true" setvar_vaddr="data_region_vaddr" />
     </protection_domain>
-<!-- 
-    <protection_domain name="client_core1_contender1" priority="99" cpu="1">
+
+    <!-- <protection_domain name="client_core1_contender1" priority="99" cpu="1">
         <program_image path="client_contender.elf" />
+        <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
     </protection_domain> -->
 
     <channel>
@@ -78,6 +80,7 @@
 <!-- 
     <protection_domain name="client_core2_contender1" priority="99" cpu="2">
         <program_image path="client_contender.elf" />
+        <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
     </protection_domain> -->
 
     <channel>
@@ -105,14 +108,15 @@
 
     <!-- <protection_domain name="client_core3_contender1" priority="99" cpu="3">
         <program_image path="client_contender.elf" />
+        <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
     </protection_domain> -->
 
     <channel>
         <end pd="server_core3" id="8" />
         <end pd="client_core3" id="0" pp="true" />
     </channel>
-<!-- 
-    <channel>
+
+    <!-- <channel>
         <end pd="server_core3" id="18" />
         <end pd="client_core3_contender1" id="0" pp="true" />
     </channel> -->
@@ -131,8 +135,8 @@
         <end pd="client_core0" id="3" />
         <end pd="client_core3" id="1" />
     </channel>
-
-    <!-- <channel>
+<!-- 
+    <channel>
         <end pd="client_core0" id="11" />
         <end pd="client_core0_contender1" id="1" />
     </channel>
