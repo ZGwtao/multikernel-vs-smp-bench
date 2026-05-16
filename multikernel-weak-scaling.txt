@@ -1,0 +1,22 @@
+
+1 core, 1 client, 1,000,000 per core, Multikernel
+    + 1358
+1 core, 2 client, 1,000,000 per core, Multikernel
+    + 1376
+
+2 core, 1 client, 1,000,000 per core, Multikernel
+    + 659
+2 core, 2 client, 1,000,000 per core, Multikernel
+    + 667
+
+3 core, 1 client, 1,000,000 per core
+    + 455
+3 core, 2 client,
+    + 463
+
+4 core, 1 client
+    + 363
+4 core, 2 client
+    + 365
+
+
