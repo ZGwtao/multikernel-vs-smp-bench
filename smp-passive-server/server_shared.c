@@ -58,24 +58,31 @@ microkit_msginfo protected(microkit_channel ch, microkit_msginfo msginfo)
         }
 
         last = curr;
-        // if (flag) {
-        //     seL4_SetMR(0, local_cnt);
-        //     seL4_SetMR(1, start);
-        //     tag = seL4_ReplyRecv(INPUT_CAP, microkit_msginfo_new(0, 2), &badge, REPLY_CAP);
-        //     microkit_dbg_puts("Server: reached 1000000\n");
-        //     // for (;;) {}
-        // }
-        if (local_cnt >= 1000000) {
-            // flag = 1;
+
+        if (local_cnt >= (WEAK_SCALING_LOOP - 10)) {
+#if 0
             seL4_SetMR(0, local_cnt);
             seL4_SetMR(1, start);
             tag = seL4_ReplyRecv(INPUT_CAP, microkit_msginfo_new(0, 2), &badge, REPLY_CAP);
-            // microkit_dbg_puts("Server: reached 1000000\n");
+#else
+            break;
+#endif
         } else {
             seL4_SetMR(0, local_cnt);
             tag = seL4_ReplyRecv(INPUT_CAP, reply_tag, &badge, REPLY_CAP);
         }
     }
+
+    cycles_t period = curr - start;
+
+    puthex64(local_cnt);
+    puts("\n");
+    puthex64(period);
+    puts("\n");
+    puthex64(period / local_cnt);
+    puts("\n");
+    tag = seL4_ReplyRecv(INPUT_CAP, reply_tag, &badge, REPLY_CAP);
+    for (;;) {}
     return seL4_MessageInfo_new(0, 0, 0, 0);
 }
 

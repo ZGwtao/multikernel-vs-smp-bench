@@ -1,0 +1,30 @@
+
+1 core, 1 client, 1,000,000 round, SMP
+    + 1495 cycles per round-trip
+1 core, 2 client, 1,000,000 round, SMP
+    + 1499 cycles, per round-trip
+1 core, 3 client, 1,000,000 round, SMP
+    + 1509 cycles
+
+2 core, 1 client, 2,000,000 round, SMP
+    + 7943 cycles, per round-trip
+2 core, 2 client, 2,000,000 round, SMP
+    + 6094 cycles, per round-trip
+2 core, 3 client, 2,000,000 round, SMP
+    + 5264 cycles
+
+3 core, 1 client, 3,000,000 round, SMP
+    + 7966 cycles
+3 core, 2 client, 3,000,000 round, SMP
+    + 8055
+3 core, 3 client, 3,000,000 round, SMP
+    + 7744
+
+4 core, 1 client, 4,000,000 round, SMP
+    + 8000
+4 core, 2 client, 4,000,000 round, SMP
+    + 8066
+4 core, 3 client, 4,000,000 round, SMP
+    + 7796
+
+

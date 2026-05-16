@@ -22,18 +22,13 @@ void init(void) {}
 
 void notified(microkit_channel ch)
 {
-    for (;;) {
+    for (int i = 0; i < WEAK_SCALING_BATCH; ++i) {
         (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(0, 0));
+#if 0
         seL4_Word local_cnt = seL4_GetMR(0);
         if (local_cnt >= 1000000) {
             cycles_t curr_timestamp = read_cntvct() * 50;
             cycles_t start_timestamp = seL4_GetMR(1);
-            // microkit_dbg_puts("\n");
-            // microkit_dbg_puts("Server reached 1000000, eventually\n");
-            // microkit_dbg_puts("Total:");
-            // microkit_dbg_put32(curr_timestamp - start_timestamp);
-            // microkit_dbg_puts("\n");
-            // microkit_dbg_puts("Average:");
             for (int i = 0; i < 10000; ++i) {
                 asm volatile ("nop");
             }
@@ -41,5 +36,6 @@ void notified(microkit_channel ch)
             microkit_dbg_puts("\n");
             for (;;) {}
         }
+#endif
     }
 }

@@ -8,6 +8,12 @@
 
 #define UNUSED __attribute__((unused))
 
+#define WEAK_SCALING_BATCH_PER_CORE   (1000000)
+#define WEAK_SCALING_CLIENT_PER_CORE  (2)
+#define WEAK_SCALING_BATCH    (WEAK_SCALING_BATCH_PER_CORE / WEAK_SCALING_CLIENT_PER_CORE)
+#define WEAK_SCALING_CORE_NUM (4)
+#define WEAK_SCALING_LOOP     (WEAK_SCALING_BATCH_PER_CORE * WEAK_SCALING_CORE_NUM)
+
 /* Because we deliberately subvert libmicrokit in these examples */
 #define INPUT_CAP 1
 #define REPLY_CAP 4

@@ -26,35 +26,17 @@ void init(void)
     microkit_dbg_puts("CLIENT_CORE3|INFO: init function running\n");
 
     pmu_enable();
-// }
 
-// void notified(microkit_channel ch)
-// {
-//     microkit_dbg_puts("CLIENT_CORE3|INFO: received notification from core 0\n");
-//     microkit_dbg_puts("client 3: call server\n");
-#if 1
     microkit_notify(LOCAL_CONTENDER1_CH);
     microkit_notify(LOCAL_CONTENDER2_CH);
-    for (;;) {
-#if 0
-        for (int i = 0; i < 1000; i++) {
-            /* busy wait to increase the chance of preemption */
-            asm volatile("nop");
-        }
-#endif
+
+    for (int i = 0; i < WEAK_SCALING_BATCH; ++i) {
         (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(0, 0));
+#if 0
         seL4_Word local_cnt = seL4_GetMR(0);
         if (local_cnt >= 1000) {
             cycles_t curr_timestamp = read_cntvct() * 50;
             cycles_t start_timestamp = seL4_GetMR(1);
-            // microkit_dbg_puts("\n");
-            // microkit_dbg_puts("Server reached 1000, eventually\n");
-            // microkit_dbg_puts("Total:");
-            // microkit_dbg_put32(curr_timestamp - start_timestamp);
-            // microkit_dbg_puts("\n");
-            // microkit_dbg_puts("Average:");
-            // microkit_dbg_put32((curr_timestamp - start_timestamp)/local_cnt);
-            // microkit_dbg_puts("\n");
             for (int i = 0; i < 10000; ++i) {
                 asm volatile ("nop");
             }
@@ -62,11 +44,8 @@ void init(void)
             puts("\n");
             for (;;) {}
         }
-    }
-#else
-    microkit_notify(REMOTE_CH);
-    (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(0, 0));
 #endif
+    }
 }
 
 void notified(microkit_channel ch) {}
