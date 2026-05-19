@@ -1,0 +1,46 @@
+
+SMP, NullSyscall interference
+===============================
+    + 1 core (no interference)
+        = 954, stddev = 49.69 (cycles)
+    + 2 cores:
+        = 1259, stddev = 63.10
+    + 3 cores: 
+        = 1506, stddev = 83.97
+    + 4 cores:
+        = 1851, stddev = 105.96
+
+
+Multikernel, NullSyscall interference
+===============================
+    + 1 core, 
+        = 676, stddev = 19.8
+    + 2 core,
+        = 677, stddev = 19.45
+    + 3 cores,
+        = 677, stddev = 19.21
+    + 4 cores,
+        = 676, stddev = 19.86
+
+
+SMP, ppc-pair interference
+===============================
+    + 1 core (no interference)
+        = 954, stddev = 49.69 (cycles)
+    + 2 cores:
+        = 1704, stddev = 69.39
+    + 3 cores: 
+        = 2677, stddev = 109.65
+    + 4 cores:
+        = 3356, stddev = 132.78
+
+Multikernel, ppc-pair interference
+===============================
+    + 1 core (no interference)
+        = 676, stddev = 19.8 (cycles)
+    + 2 cores:
+        = 677, stddev = 19.72
+    + 3 cores: 
+        = 677, stddev = 19.74
+    + 4 cores:
+        = 677, stddev = 19.86
