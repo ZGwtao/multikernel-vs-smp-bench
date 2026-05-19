@@ -1,0 +1,13 @@
+
+Virtualisation=ON
+GCC 11.3
+Microkit
+
+SMP without lock contention:
+    + 954 cycles, stddev = 49.69
+Unicore:
+    + 668 cycles, stddev = 19.79
+Multikernel:
+    + 676 cycles, stddev = 19.8
+
+
