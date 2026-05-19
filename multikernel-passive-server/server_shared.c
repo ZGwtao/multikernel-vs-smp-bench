@@ -222,7 +222,7 @@ microkit_msginfo protected(microkit_channel ch, microkit_msginfo msginfo)
 
     seL4_Word badge;
     seL4_MessageInfo_t tag UNUSED;
-    seL4_MessageInfo_t reply_tag = microkit_msginfo_new(0, 0);
+    seL4_MessageInfo_t reply_tag = microkit_msginfo_new(0, 1);
     /* To make this simpler this literally just always replies */
     while (1) {
         shared_lock_acquire();
@@ -238,7 +238,7 @@ microkit_msginfo protected(microkit_channel ch, microkit_msginfo msginfo)
             }
             last = curr;
             seL4_Word *shared_data = shared_data_region_addr(0);
-            if ((*shared_data > 1000000)) {
+            if ((*shared_data >= (WEAK_SCALING_LOOP - 100))) {
                 seL4_SetMR(0, (*shared_data));
                 seL4_SetMR(1, start);
                 reply_tag = microkit_msginfo_new(0, 2);

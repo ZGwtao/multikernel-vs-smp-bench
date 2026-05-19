@@ -23,8 +23,10 @@ void init(void) {}
 
 void notified(microkit_channel ch)
 {
-    for (;;) {
+    // for (int i = 0; i < WEAK_SCALING_BATCH; ++i) {
+    for (int i = 0;; ++i) {
         (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(0, 0));
+#if 0
         seL4_Word curr = seL4_GetMR(0);
         if (curr >= 1000000) {
             cycles_t now = read_cntvct() * 50;
@@ -37,5 +39,21 @@ void notified(microkit_channel ch)
             puts("\n");
             for (;;) {}
         }
+#else
+        seL4_Word curr = seL4_GetMR(0);
+        if (curr >= (WEAK_SCALING_LOOP - 100)) {
+            cycles_t now = read_cntvct() * 50;
+            cycles_t start = seL4_GetMR(1);
+            for (int i = 0; i < 80000; ++i) {
+                asm volatile ("nop");
+            }
+            // puts("\ncontender: ");
+            puthex64((now - start)/curr);
+            // puts("\ni = ");
+            // puthex64(i);
+            puts("\n");
+            break;
+        }
+#endif
     }
 }
