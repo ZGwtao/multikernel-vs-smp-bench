@@ -1,0 +1,22 @@
+
+1 core, 1 client, 1,000,000 rounds per core, SMP
+    + 1888
+1 core, 1 client, 1,000,000 rounds per core, SMP
+    + 1882
+
+2 core, 1 client, 1,000,000 rounds per core, SMP
+    + 3067
+2 core, 1 client, 1,000,000 rounds per core, SMP
+    + 3136
+
+
+3 core, 1 client, 1,000,000 rounds per core, SMP
+    + 3698
+3 core, 2 client, 1,000,000 rounds per core, SMP
+    + 3696
+
+4 core, 1 client, 1,000,000 rounds per core, SMP
+    + 3949
+4 core, 2 client, 1,000,000 rounds per core, SMP
+    + 3967
+
