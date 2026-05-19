@@ -58,3 +58,34 @@ julia's PR:
 4 core, 3 client, 4,000,000 round, SMP
     + 7942
 
+
+tuned:
+
+1 core, 1 client, 1,000,000 round, SMP
+    + 1358 cycles per round-trip
+1 core, 2 client, 1,000,000 round, SMP
+    + 1338 cycles, per round-trip
+1 core, 3 client, 1,000,000 round, SMP
+    + 1351 cycles
+
+2 core, 1 client, 2,000,000 round, SMP
+    + 6636 cycles, per round-trip
+2 core, 2 client, 2,000,000 round, SMP
+    + 4869 cycles, per round-trip
+2 core, 3 client, 2,000,000 round, SMP
+    + 4414 cycles
+
+3 core, 1 client, 3,000,000 round, SMP
+    + 6645 cycles
+3 core, 2 client, 3,000,000 round, SMP
+    + 6706
+3 core, 3 client, 3,000,000 round, SMP
+    + 6466
+
+4 core, 1 client, 4,000,000 round, SMP
+    + 6589
+4 core, 2 client, 4,000,000 round, SMP
+    + 6725
+4 core, 3 client, 4,000,000 round, SMP
+    + 6438
+
