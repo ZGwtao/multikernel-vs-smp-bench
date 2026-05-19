@@ -1,0 +1,44 @@
+
+1 core, 1 client, 1,000,000 rounds per core, SMP
+    + 1888
+1 core, 1 client, 1,000,000 rounds per core, SMP
+    + 1882
+
+2 core, 1 client, 1,000,000 rounds per core, SMP
+    + 3067
+2 core, 1 client, 1,000,000 rounds per core, SMP
+    + 3136
+
+
+3 core, 1 client, 1,000,000 rounds per core, SMP
+    + 3698
+3 core, 2 client, 1,000,000 rounds per core, SMP
+    + 3696
+
+4 core, 1 client, 1,000,000 rounds per core, SMP
+    + 3949
+4 core, 2 client, 1,000,000 rounds per core, SMP
+    + 3967
+
+tuned
+
+1 core, 1 client, 1,000,000 rounds per core, SMP
+    + 1721
+1 core, 2 client, 1,000,000 rounds per core, SMP
+    + 1688
+
+2 core, 1 client, 1,000,000 rounds per core, SMP
+    + 2384
+2 core, 2 client, 1,000,000 rounds per core, SMP
+    + 2457
+
+
+3 core, 1 client, 1,000,000 rounds per core, SMP
+    + 2809
+3 core, 2 client, 1,000,000 rounds per core, SMP
+    + 2777
+
+4 core, 1 client, 1,000,000 rounds per core, SMP
+    + 2957
+4 core, 2 client, 1,000,000 rounds per core, SMP
+    + 2949
