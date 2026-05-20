@@ -127,7 +127,7 @@ def print_stats(label: str, pairs: list[tuple[int, int]]):
         print(f"    total  : {s['total']}")
 
     # Per-sample detail table (only when sample count is manageable)
-    if len(pairs) <= 50:
+    if len(pairs) <= 1200:
         print(f"\n  {'#':>4}  {'acquire':>10}  {'release':>10}  {'total':>10}")
         print(f"  {'-'*4}  {'-'*10}  {'-'*10}  {'-'*10}")
         for i, (a, r) in enumerate(pairs, 1):
@@ -165,13 +165,13 @@ def main():
     print_stats("seL4_Call      (id=0 + id=1)", sel4_call_pairs)
     print_stats("seL4_ReplyRecv (id=2 + id=1)", sel4_replyrecv_pairs)
 
-    if unpaired:
-        print(f"\n  ⚠  {len(unpaired)} unpaired entries found")
-        if args.show_unpaired:
-            for tp_id, dur in unpaired:
-                print(f"    id={tp_id}  duration={dur:#x} ({dur})")
-    else:
-        print("\n  ✓ All entries successfully paired.")
+    # if unpaired:
+    #     print(f"\n  ⚠  {len(unpaired)} unpaired entries found")
+    #     if args.show_unpaired:
+    #         for tp_id, dur in unpaired:
+    #             print(f"    id={tp_id}  duration={dur:#x} ({dur})")
+    # else:
+    #     print("\n  ✓ All entries successfully paired.")
 
 
 if __name__ == "__main__":
