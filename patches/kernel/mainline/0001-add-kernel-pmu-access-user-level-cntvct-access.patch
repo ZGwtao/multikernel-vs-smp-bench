@@ -18,7 +18,7 @@ index a4b152a3a..80d7e54fc 100644
  static inline timestamp_t timestamp(void)
  {
      timestamp_t ccnt;
-+#if 0
++#if 1
      SYSTEM_READ_WORD(CCNT, ccnt);
 +#else
 +    SYSTEM_READ_WORD(PMEVCNTR, ccnt);
