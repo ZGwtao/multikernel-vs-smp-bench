@@ -24,7 +24,8 @@ void init(void)
     while (true) {
         /* We don't do any measurements here */
         tag = seL4_Recv(INPUT_CAP, &badge, REPLY_CAP);
-        seL4_Signal(BASE_OUTPUT_NOTIFICATION_CAP + SIGNAL_MID_HIGH_CHANNEL);
+        // seL4_Signal(BASE_OUTPUT_NOTIFICATION_CAP + SIGNAL_MID_HIGH_CHANNEL);
+        seL4_Signal(BASE_OUTPUT_NOTIFICATION_CAP + SIGNAL_LOW_MID_CHANNEL);
     }
 }
 

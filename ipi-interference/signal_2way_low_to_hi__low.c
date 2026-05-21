@@ -36,7 +36,8 @@ void init(void)
         start = pmu_read_cycles();
         seL4_Signal(BASE_OUTPUT_NOTIFICATION_CAP + SIGNAL_LOW_MID_CHANNEL);
         tag = seL4_Recv(INPUT_CAP, &badge, REPLY_CAP);
-        end = *(volatile cycles_t *)(shared);
+        // end = *(volatile cycles_t *)(shared);
+        end = pmu_read_cycles();
 
         asm volatile("" :: "r"(start), "r"(end));
     }
@@ -53,6 +54,7 @@ void init(void)
         /* Now we wait for a reply for the mid to tell the high, and then
            high to tell us that it has updated the shared information. */
         tag = seL4_Recv(INPUT_CAP, &badge, REPLY_CAP);
+        end = pmu_read_cycles();
 
         /*
          * ARM guarantees that the writes are coherent w.r.t the same
@@ -69,7 +71,7 @@ void init(void)
          * Ref: ARM ARM DDII 0487 L.b, p. G5-11701, §G5.10.1 Data and unified caches
          */
         static_assert(CONFIG_ARCH_ARM, "on an ARM platform");
-        end = *(volatile cycles_t *)(shared);
+        // end = *(volatile cycles_t *)(shared);
 
         RECORDING_ADD_SAMPLE(start, end);
     }
