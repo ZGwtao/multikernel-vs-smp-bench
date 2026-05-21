@@ -1,0 +1,44 @@
+
+- SMP - idle
+    => no contending cores
+        + 6285 cy, 82.77
+    => 1 contending cores (NullSyscall)
+        + 6894 cy, 104.75
+    => 2 contending cores (NullSyscall)
+        + 6941 cy, 134.82
+- SMP - local interfering client: busy-loop
+    => no contending cores
+        + 7822 cy, 98.74
+    => 1 contending cores (NullSyscall)
+        + 8477 cy, 124.66
+    => 2 contending cores (NullSyscall)
+        + 8737 cy, 162.99
+- SMP - local interfering client: NullSyscall,
+    => no contending cores
+        + 8536 cy, 110.612
+    => 1 contending cores (NullSyscall)
+        + 8970 cy, 143.45
+    => 2 contending cores (NullSyscall)
+        + 9907 cy, 170.51
+
+MK - idle
+    => no contending cores
+        + 1903 cy, 25.10
+    => 1 contending core (NullSyscall)
+        + 1903 cy, 24.9
+    => 2 contending cores (NullSyscall)
+        + 1904 cy, 25.21
+MK - local interfering client: busy-loop
+    = no contending cores
+        + 2933 cy, 39.93
+    => 1 contending core (NullSyscall)
+        + 2912 cy, 39.94
+    => 2 contending cores (NullSyscall)
+        + 2933 cy, 39.43
+MK - local interfering client: NullSyscall
+    = no contending cores
+        + 3064 cy, 60.22
+    => 1 contending core (NullSyscall)
+        + 3070 cy, 59.99
+    => 2 contending cores (NullSyscall)
+        + 3052 cy, 60.20

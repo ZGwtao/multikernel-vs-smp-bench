@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+#include "config.h"
+
+#define str(v) _str(v)
+#define _str(v) #v
+
+<!--
+ Copyright 2025, UNSW
+
+ SPDX-License-Identifier: BSD-2-Clause
+-->
+<system>
+    <memory_region name="uart" size="0x1000" phys_addr="0xff803000" />
+
+    <!-- Benchmark 1: 2way low to high test, cross core. -->
+        <memory_region name="signal_2way_low_to_hi_cross_core__results" size="0x1000" />
+        <!-- <memory_region name="signal_2way_low_to_hi_cross_core__shared" size="0x1000" /> -->
+
+        <protection_domain name="signal_2way_low_to_hi_cross_core__low" priority="105" cpu="0">
+            <program_image path="signal_2way_low_to_hi__low.elf" />
+
+            <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
+            <map mr="signal_2way_low_to_hi_cross_core__results" vaddr="0x30001000" setvar_vaddr="results" />
+            <!-- <map mr="signal_2way_low_to_hi_cross_core__shared"  vaddr="0x30010000" setvar_vaddr="shared" /> -->
+        </protection_domain>
+
+        <protection_domain name="interfering_pd_core_0" priority="50" cpu="0">
+            <program_image path="interfering_low.elf" />
+            <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
+        </protection_domain>
+
+        <protection_domain name="signal_2way_low_to_hi_cross_core__mid" priority="105" cpu="1">
+            <program_image path="signal_2way_low_to_hi__mid.elf" />
+
+            <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
+        </protection_domain>
+
+        <protection_domain name="interfering_pd_core_1" priority="50" cpu="1">
+            <program_image path="interfering_low.elf" />
+            <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
+        </protection_domain>
+
+        <!-- <protection_domain name="signal_2way_low_to_hi_cross_core__high" priority="205" cpu="0">
+            <program_image path="signal_2way_low_to_hi__high.elf" />
+
+            <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
+            <map mr="signal_2way_low_to_hi_cross_core__shared" vaddr="0x30010000" setvar_vaddr="shared" />
+        </protection_domain> -->
+
+        <channel>
+            <end pd="signal_2way_low_to_hi_cross_core__low" id="1" />
+            <end pd="signal_2way_low_to_hi_cross_core__mid" id="1" />
+        </channel>
+
+        <!-- <channel>
+            <end pd="signal_2way_low_to_hi_cross_core__mid" id="2" />
+            <end pd="signal_2way_low_to_hi_cross_core__high" id="2" />
+        </channel> -->
+
+        <!-- <channel>
+            <end pd="signal_2way_low_to_hi_cross_core__high" id="3" />
+            <end pd="signal_2way_low_to_hi_cross_core__low"  id="3" />
+        </channel> -->
+
+    <!-- lowest priority. it should never interfere -->
+    <protection_domain name="manager" priority="55" cpu="0">
+        <program_image path="manager.elf" />
+
+        <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
+        <map mr="signal_2way_low_to_hi_cross_core__results" vaddr="0x30001000" setvar_vaddr="results_base" />
+    </protection_domain>
+
+    <channel>
+        <end pd="manager" id=str(BENCHMARK_CH__SIGNAL_2WAY_CROSS_CORE_LOW_HI) />
+        <end pd="signal_2way_low_to_hi_cross_core__low" id="0" />
+    </channel>
+
+    <protection_domain name="interfering_pd_core_2" priority="50" cpu="2">
+        <program_image path="interfering_low.elf" />
+        <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
+    </protection_domain>
+
+    <protection_domain name="interfering_pd_core_3" priority="50" cpu="3">
+        <program_image path="interfering_low.elf" />
+        <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
+    </protection_domain>
+
+
+</system>
