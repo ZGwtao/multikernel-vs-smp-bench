@@ -43,7 +43,7 @@ endif
 
 MICROKIT_TOOL ?= $(MICROKIT_SDK)/bin/microkit
 
-IMAGES := manager.elf \
+IMAGES := manager.elf interfering_low.elf \
   signal_low_to_hi_same_core__high.elf signal_low_to_hi_same_core__low.elf \
   signal_hi_to_low__high.elf signal_hi_to_low__low.elf \
   signal_2way_low_to_hi__low.elf signal_2way_low_to_hi__mid.elf signal_2way_low_to_hi__high.elf

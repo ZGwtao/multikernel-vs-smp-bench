@@ -25,10 +25,18 @@
             <map mr="signal_2way_low_to_hi_cross_core__shared"  vaddr="0x30010000" setvar_vaddr="shared" />
         </protection_domain>
 
+        <protection_domain name="interfering_pd_core_0" priority="50" cpu="0">
+            <program_image path="interfering_low.elf" />
+        </protection_domain>
+
         <protection_domain name="signal_2way_low_to_hi_cross_core__mid" priority="155" cpu="1">
             <program_image path="signal_2way_low_to_hi__mid.elf" />
 
             <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
+        </protection_domain>
+
+        <protection_domain name="interfering_pd_core_1" priority="50" cpu="1">
+            <program_image path="interfering_low.elf" />
         </protection_domain>
 
         <protection_domain name="signal_2way_low_to_hi_cross_core__high" priority="205" cpu="0">
