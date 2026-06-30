@@ -27,14 +27,6 @@ static inline seL4_Word *shared_time_stamp_addr(void)
     return (seL4_Word *)(data_region_vaddr + SHARED_TIME_STAMP_OFFSET);
 }
 
-#define SAMPLE_OFFSET 16UL
-#define SUM_OFFSET 17UL
-#define SUM_SQUARED_OFFSET 18UL
-#define MIN_OFFSET 19UL
-#define MAX_OFFSET 20UL
-#define LAST_START_OFFSET 21UL
-#define LAST_END_OFFSET 22UL
-
 static inline seL4_Word read_shared_data(seL4_Word index)
 {
     return *shared_data_region_addr(index);
@@ -264,13 +256,6 @@ void init(void)
      */
     shared_lock_init();
     pmu_enable();
-    write_shared_data(SUM_OFFSET, 0);
-    write_shared_data(SUM_SQUARED_OFFSET, 0);
-    write_shared_data(MIN_OFFSET, CYCLES_MAX);
-    write_shared_data(MAX_OFFSET, CYCLES_MIN);
-    write_shared_data(SAMPLE_OFFSET, 0);
-    write_shared_data(LAST_START_OFFSET, 0);
-    write_shared_data(LAST_END_OFFSET, 0);
     microkit_dbg_puts("SERVER_SHARED|INFO: init function running\n");
 }
 
