@@ -8,7 +8,7 @@
 
 #define UNUSED __attribute__((unused))
 
-#define WEAK_SCALING_BATCH_PER_CORE   (1000000)
+#define WEAK_SCALING_BATCH_PER_CORE   (10000)
 #define WEAK_SCALING_CLIENT_PER_CORE  (1)
 #define WEAK_SCALING_BATCH    (1000 + (WEAK_SCALING_BATCH_PER_CORE / WEAK_SCALING_CLIENT_PER_CORE))
 #define WEAK_SCALING_CORE_NUM (2)
@@ -55,3 +55,20 @@ typedef struct {
     _results->min = min;                                         \
     _results->max = max;                                         \
   } while (0)
+
+#define RELEASE2_LOCK_OFFSET  4072UL
+#define RELEASE_LOCK_OFFSET  4080UL
+
+uintptr_t boot_region_vaddr;
+
+static inline volatile uint64_t *
+boot_release_lock_addr(void)
+{
+    return (volatile uint64_t *)(boot_region_vaddr + RELEASE_LOCK_OFFSET);
+}
+
+static inline volatile uint64_t *
+boot_release2_lock_addr(void)
+{
+    return (volatile uint64_t *)(boot_region_vaddr + RELEASE2_LOCK_OFFSET);
+}

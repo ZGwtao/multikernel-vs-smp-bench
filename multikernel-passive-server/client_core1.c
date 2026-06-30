@@ -24,31 +24,14 @@ static inline uint64_t read_cntvct(void)
     return v;
 }
 
-
 void init(void) {}
 
 void notified(microkit_channel ch)
 {
-    microkit_notify(LOCAL_CONTENDER_CH);
-
-    // for (int i = 0; i < WEAK_SCALING_BATCH; ++i) {
-    for (int i = 0;; ++i) {
+    for (;;) {
         (void) microkit_ppcall(SERVER_CH, microkit_msginfo_new(0, 0));
-#if 0
         seL4_Word curr = seL4_GetMR(0);
-        if (curr >= 1000000) {
-            cycles_t now = read_cntvct() * 50;
-            cycles_t start = seL4_GetMR(1);
-            for (int i = 0; i < 17000; ++i) {
-                asm volatile ("nop");
-            }
-            puts("\nclient 1: ");
-            puthex64((now - start)/curr);
-            puts("\n");
-            for (;;) {}
-        }
-#else
-        seL4_Word curr = seL4_GetMR(0);
+#if 1
         if (curr >= (WEAK_SCALING_LOOP - 100)) {
             cycles_t now = read_cntvct() * 50;
             cycles_t start = seL4_GetMR(1);
@@ -57,12 +40,6 @@ void notified(microkit_channel ch)
             }
             puts("\nclient 1: ");
             puthex64((now - start)/curr);
-            // puts("\ncurr = ");
-            // puthex64(curr);
-            // puts("\nstart = ");
-            // puthex64(start);
-            // puts("\ni = ");
-            // puthex64(i);
             puts("\n");
             break;
         }

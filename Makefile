@@ -66,7 +66,7 @@ setup-rust:
 
 # Example to symlink into each microkit's example/ directory
 EXAMPLE ?= ppc-no-interference
-# EXAMPLE_PASSIVE_SERVER ?= multikernel-passive-server
+EXAMPLE_PASSIVE_SERVER ?= multikernel-passive-server
 EXAMPLE_PASSIVE_SERVER ?= smp-passive-server
 EXAMPLE := $(EXAMPLE_PASSIVE_SERVER)
 
@@ -126,10 +126,11 @@ setup-submodules:
 # ============================================================
 # Build targets
 # ============================================================
-SYSTEM_FILE := benchmarks-three-cores.system
+# SYSTEM_FILE := benchmarks-three-cores.system
+SYSTEM_FILE := passive_server-two-cores.system
 export SYSTEM_FILE
 
-multikernel: setup-submodules
+multikernel:
 	@echo ">>> Building multikernel (board=$(MICROKIT_BOARD)_multikernel, config=$(MICROKIT_CONFIG))..."
 	cd $(MICROKIT_MULTIKERNEL) && \
 		$(PYTHON) build_sdk.py \

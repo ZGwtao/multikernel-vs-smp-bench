@@ -6,6 +6,7 @@
 -->
 <system>
     <memory_region name="shared_region" size="0x1000" page_size="0x1000" />
+    <memory_region name="boot_region" size="0x1000" page_size="0x1000" />
     <memory_region name="data_region" size="0x1000" page_size="0x1000" />
     <memory_region name="uart" size="0x1000" phys_addr="0xff803000" />
 
@@ -14,12 +15,14 @@
         <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
         <map mr="shared_region" vaddr="0xffc00000" perms="rw" cached="true" setvar_vaddr="shared_region_vaddr" />
         <map mr="data_region" vaddr="0xffd00000" cached="true" setvar_vaddr="data_region_vaddr" />
+        <map mr="boot_region" vaddr="0xffe00000" perms="rw" cached="true" setvar_vaddr="boot_region_vaddr" />
     </protection_domain>
 
     <protection_domain name="client_core0" priority="99" cpu="0">
         <program_image path="client_core0.elf" />
         <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
         <map mr="data_region" vaddr="0xffd00000" cached="true" setvar_vaddr="data_region_vaddr" />
+        <map mr="boot_region" vaddr="0xffe00000" perms="rw" cached="true" setvar_vaddr="boot_region_vaddr" />
     </protection_domain>
 
     <!-- <protection_domain name="client_core0_contender1" priority="99" cpu="0">
@@ -42,6 +45,7 @@
         <map mr="uart" vaddr="0x30000000" cached="false" setvar_vaddr="uart_base" />
         <map mr="shared_region" vaddr="0xffc00000" perms="rw" cached="true" setvar_vaddr="shared_region_vaddr" />
         <map mr="data_region" vaddr="0xffd00000" cached="true" setvar_vaddr="data_region_vaddr" />
+        <map mr="boot_region" vaddr="0xffe00000" perms="rw" cached="true" setvar_vaddr="boot_region_vaddr" />
     </protection_domain>
 
     <protection_domain name="client_core1" priority="99" cpu="1">
