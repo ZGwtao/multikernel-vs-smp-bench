@@ -16,7 +16,45 @@ void putc(uint8_t ch) {
     *UART_REG(UART_WFIFO) = ch;
 }
 
+#elif defined(CONFIG_PLAT_BCM2711)
 
+#undef UART_REG
+#define UART_REG(x) ((volatile uint32_t *)(uart_base + 0x40 + (x)))
+/* rpi4b */
+#define UART_BASE 0xfe215040
+#define MU_IO 0x00
+#define MU_LSR 0x14
+#define MU_LSR_TXIDLE (1 << 6)
+
+void putc(uint8_t ch)
+{
+    while (!(*UART_REG(MU_LSR) & MU_LSR_TXIDLE));
+    *UART_REG(MU_IO) = (ch & 0xff);
+}
+
+#elif defined(CONFIG_PLAT_TQMA8XQP1GB)
+// #define UART_BASE 0x5a070000
+#define STAT 0x14
+#define TRANSMIT 0x1c
+#define STAT_TDRE (1 << 23)
+
+void putc(uint8_t ch)
+{
+    while (!(*UART_REG(STAT) & STAT_TDRE)) { }
+    *UART_REG(TRANSMIT) = ch;
+}
+
+#elif defined(CONFIG_PLAT_MAAXBOARD)
+#define STAT 0x98
+#define TRANSMIT 0x40
+#define STAT_TDRE (1 << 14)
+
+void putc(uint8_t ch)
+{
+    // ensure FIFO has space
+    while (!(*UART_REG(STAT) & STAT_TDRE)) { }
+    *UART_REG(TRANSMIT) = ch;
+}
 #else
 #error "unsupported board"
 #endif
